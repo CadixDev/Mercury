@@ -1,0 +1,208 @@
+--- a/org/eclipse/jdt/core/dom/rewrite/ImportRewrite.java
++++ b/org/eclipse/jdt/core/dom/rewrite/ImportRewrite.java
+@@ -58,6 +58,7 @@
+ import org.eclipse.jdt.core.dom.Modifier;
+ import org.eclipse.jdt.core.dom.Name;
+ import org.eclipse.jdt.core.dom.NormalAnnotation;
++import org.eclipse.jdt.core.dom.PackageDeclaration;
+ import org.eclipse.jdt.core.dom.ParameterizedType;
+ import org.eclipse.jdt.core.dom.PrimitiveType;
+ import org.eclipse.jdt.core.dom.SimpleName;
+@@ -73,6 +74,7 @@
+ import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteConfiguration.ImportContainerSorting;
+ import org.eclipse.jdt.internal.core.util.Messages;
+ import org.eclipse.jdt.internal.core.util.Util;
++import org.eclipse.jface.text.IDocument;
+ import org.eclipse.text.edits.MultiTextEdit;
+ import org.eclipse.text.edits.TextEdit;
+ 
+@@ -320,6 +322,9 @@
+ 	private final ICompilationUnit compilationUnit;
+ 	private final CompilationUnit astRoot;
+ 
++	private String implicitPackageName;
++	private List<String> implicitTypes;
++
+ 	private final boolean restoreExistingImports;
+ 	private final List existingImports;
+ 	private final Map importsKindMap;
+@@ -381,9 +386,8 @@
+ 	}
+ 
+ 	/**
+-	 * Creates an {@link ImportRewrite} from an AST ({@link CompilationUnit}). The AST has to be created from an
+-	 * {@link ICompilationUnit}, that means {@link ASTParser#setSource(ICompilationUnit)} has been used when creating the
+-	 * AST. If <code>restoreExistingImports</code> is <code>true</code>, all existing imports are kept, and new imports
++	 * Creates an {@link ImportRewrite} from an AST ({@link CompilationUnit}).
++	 * If <code>restoreExistingImports</code> is <code>true</code>, all existing imports are kept, and new imports
+ 	 * will be inserted at best matching locations. If <code>restoreExistingImports</code> is <code>false</code>, the
+ 	 * existing imports will be removed and only the newly added imports will be created.
+ 	 * <p>
+@@ -392,14 +396,14 @@
+ 	 * @param astRoot the AST root node to create the imports for
+ 	 * @param restoreExistingImports specifies if the existing imports should be kept or removed.
+ 	 * @return the created import rewriter.
+-	 * @throws IllegalArgumentException thrown when the passed AST is null or was not created from a compilation unit.
++	 * @throws IllegalArgumentException thrown when the passed AST is null
+ 	 */
+ 	public static ImportRewrite create(CompilationUnit astRoot, boolean restoreExistingImports) {
+ 		if (astRoot == null) {
+ 			throw new IllegalArgumentException("AST must not be null"); //$NON-NLS-1$
+ 		}
+ 		ITypeRoot typeRoot = astRoot.getTypeRoot();
+-		if (!(typeRoot instanceof ICompilationUnit)) {
++		if (typeRoot != null && !(typeRoot instanceof ICompilationUnit)) {
+ 			throw new IllegalArgumentException("AST must have been constructed from a Java element"); //$NON-NLS-1$
+ 		}
+ 		List existingImport= null;
+@@ -422,7 +426,7 @@
+ 	}
+ 
+ 	private ImportRewrite(ICompilationUnit cu, CompilationUnit astRoot, List existingImports) {
+-		this.compilationUnit= cu;
++		this.compilationUnit= cu; // might be null
+ 		this.astRoot= astRoot; // might be null
+ 		if (existingImports != null) {
+ 			this.existingImports= existingImports;
+@@ -455,8 +459,33 @@
+ 		this.importsKindMap = new HashMap();
+ 	}
+ 
++	/**
++	 * Defines the implicit package name to be used by the {@link ImportRewrite}.
++	 * The package name is used to determine implicit imports that are available from the same package.
++	 * By default, the package name from the given compilation unit is used. This setter can be used in
++	 * case the package name is about to be changed.
++	 *
++	 * @param implicitPackageName The package name of the compilation unit
++	 * @see #setUseContextToFilterImplicitImports(boolean)
++	 */
++	public void setImplicitPackageName(String implicitPackageName) {
++		this.implicitPackageName = implicitPackageName;
++	}
+ 
+ 	 /**
++	 * Defines the implicit types available from the compilation unit.
++	 * The implicit types are used to determine implicit imports that are available in the compilation unit.
++	 * By default, the types are queried from the compilation unit. This setter can be used in case one of the types
++	 * is about to be renamed.
++	 *
++	 * @param implicitTypes The implicit types to use
++	 * @see #setUseContextToFilterImplicitImports(boolean)
++	 */
++	public void setImplicitTypes(List<String> implicitTypes) {
++		this.implicitTypes = implicitTypes;
++	}
++
++	 /**
+ 	 * Defines the import groups and order to be used by the {@link ImportRewrite}.
+ 	 * Imports are added to the group matching their qualified name most. The empty group name groups all imports not matching
+ 	 * any other group. Static imports are managed in separate groups. Static import group names are prefixed with a '#' character.
+@@ -503,7 +532,8 @@
+ 
+ 	/**
+ 	 * The compilation unit for which this import rewrite was created for.
+-	 * @return the compilation unit for which this import rewrite was created for.
++	 * @return the compilation unit for which this import rewrite was created for, or
++	 * <code>null</code> if none
+ 	 */
+ 	public ICompilationUnit getCompilationUnit() {
+ 		return this.compilationUnit;
+@@ -608,15 +638,38 @@
+ 			}
+ 		}
+ 
+-		String packageName= this.compilationUnit.getParent().getElementName();
+ 		if (kind == ImportRewriteContext.KIND_TYPE) {
+ 			if (this.filterImplicitImports && this.useContextToFilterImplicitImports) {
++				String packageName = this.implicitPackageName;
++				if (packageName == null) {
++					if (this.compilationUnit != null) {
++						packageName= this.compilationUnit.getParent().getElementName();
++					} else {
++						PackageDeclaration packageDeclaration = this.astRoot.getPackage();
++						packageName= packageDeclaration != null ? packageDeclaration.getName().getFullyQualifiedName() : "";
++					}
++				}
++
++				if (qualifier.equals(packageName)) {
++					return ImportRewriteContext.RES_NAME_FOUND;
++				}
++
++				if (this.implicitTypes != null) {
++					if (this.implicitTypes.contains(name)) {
++						return qualifier.equals(packageName)
++								? ImportRewriteContext.RES_NAME_FOUND
++								: ImportRewriteContext.RES_NAME_CONFLICT;
++					}
++					return ImportRewriteContext.RES_NAME_UNKNOWN;
++				}
++
++				if (this.compilationUnit != null) {
+ 				String mainTypeSimpleName= JavaCore.removeJavaLikeExtension(this.compilationUnit.getElementName());
+ 				String mainTypeName= Util.concatenateName(packageName, mainTypeSimpleName, '.');
+-				if (qualifier.equals(packageName)
+-						|| mainTypeName.equals(Util.concatenateName(qualifier, name, '.'))) {
++					if (mainTypeName.equals(Util.concatenateName(qualifier, name, '.'))) {
+ 					return ImportRewriteContext.RES_NAME_FOUND;
+ 				}
++				}
+ 				
+ 				if (this.astRoot != null) {
+ 					List<AbstractTypeDeclaration> types = this.astRoot.types();
+@@ -1301,7 +1354,28 @@
+ 	 * @throws CoreException the exception is thrown if the rewrite fails.
+ 	 */
+ 	public final TextEdit rewriteImports(IProgressMonitor monitor) throws CoreException {
++		return rewriteImports(null, monitor);
++	}
+ 
++	/**
++	 * Converts all modifications recorded by this rewriter into an object representing the corresponding text
++	 * edits to the source code of the rewrite's compilation unit. The compilation unit itself is not modified.
++	 * <p>
++	 * Calling this methods does not discard the modifications on record. Subsequence modifications are added
++	 * to the ones already on record. If this method is called again later, the resulting text edit object will accurately
++	 * reflect the net cumulative effect of all those changes.
++	 * </p>
++	 * @param document The document to rewrite
++	 * @param monitor the progress monitor or <code>null</code>
++	 * @return text edit object describing the changes to the document corresponding to the changes
++	 * recorded by this rewriter
++	 * @throws CoreException the exception is thrown if the rewrite fails.
++	 */
++	public final TextEdit rewriteImports(IDocument document, IProgressMonitor monitor) throws CoreException {
++		if (this.compilationUnit == null && document == null) {
++			throw new IllegalArgumentException("Cannot rewrite imports without compilation unit or document");
++		}
++
+ 		SubMonitor subMonitor = SubMonitor.convert(monitor,
+ 				Messages.bind(Messages.importRewrite_processDescription), 2);
+ 		if (!hasRecordedChanges()) {
+@@ -1322,7 +1396,7 @@
+ 		ImportRewriteConfiguration config= buildImportRewriteConfiguration();
+ 
+ 		ImportRewriteAnalyzer computer=
+-			new ImportRewriteAnalyzer(this.compilationUnit, usedAstRoot, config);
++			new ImportRewriteAnalyzer(this.compilationUnit, usedAstRoot, document, config);
+ 
+ 		for (String addedImport : this.addedImports) {
+ 			boolean isStatic = STATIC_PREFIX == addedImport.charAt(0);
+@@ -1365,11 +1439,17 @@
+ 		configBuilder.setTypeOnDemandThreshold(this.importOnDemandThreshold);
+ 		configBuilder.setStaticOnDemandThreshold(this.staticImportOnDemandThreshold);
+ 
++		if (this.compilationUnit != null) {
+ 		configBuilder.setTypeContainerSorting(this.useContextToFilterImplicitImports ?
+ 				ImportContainerSorting.BY_PACKAGE : ImportContainerSorting.BY_PACKAGE_AND_CONTAINING_TYPE);
++		} else {
++			configBuilder.setTypeContainerSorting(this.useContextToFilterImplicitImports ?
++					ImportContainerSorting.NONE : ImportContainerSorting.BY_PACKAGE_AND_CONTAINING_TYPE);
++		}
+ 
+ 		configBuilder.setStaticContainerSorting(ImportContainerSorting.BY_PACKAGE_AND_CONTAINING_TYPE);
+ 
++		configBuilder.setImplicitPackageName(this.implicitPackageName);
+ 		configBuilder.setImplicitImportIdentification(this.filterImplicitImports ?
+ 				ImplicitImportIdentification.JAVA_LANG_AND_CU_PACKAGE : ImplicitImportIdentification.NONE);
+ 

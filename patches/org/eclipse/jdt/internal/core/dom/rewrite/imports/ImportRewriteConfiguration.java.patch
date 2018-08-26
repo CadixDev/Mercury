@@ -1,0 +1,128 @@
+--- a/org/eclipse/jdt/internal/core/dom/rewrite/imports/ImportRewriteConfiguration.java
++++ b/org/eclipse/jdt/internal/core/dom/rewrite/imports/ImportRewriteConfiguration.java
+@@ -21,6 +21,8 @@
+ import org.eclipse.jdt.core.IJavaElement;
+ import org.eclipse.jdt.core.IPackageDeclaration;
+ import org.eclipse.jdt.core.JavaModelException;
++import org.eclipse.jdt.core.dom.CompilationUnit;
++import org.eclipse.jdt.core.dom.PackageDeclaration;
+ import org.eclipse.jdt.internal.core.JavaProject;
+ 
+ /**
+@@ -126,9 +128,30 @@
+ 		BY_PACKAGE {
+ 			@Override
+ 			Comparator<ImportName> createContainerComparator(JavaProject javaProject) {
++				if (javaProject == null) {
++					throw new IllegalArgumentException("Cannot use ImportContainerSorting.BY_PACKAGE without JavaProject");
++				}
+ 				return new PackageImportComparator(javaProject);
+ 			}
+ 		},
++
++		/**
++		 * Do not apply special container sorting. This will make all imports in the same group
++		 * sorted by their full qualified name. For example (assuming all of the imports belong
++		 * to the same import group):
++		 * <pre>
++		 * import java.net.Socket;
++		 * import java.util.Map;
++		 * import java.util.Map.Entry;
++		 * import java.util.Set;
++		 * </pre>
++		 */
++		NONE {
++			@Override
++			Comparator<ImportName> createContainerComparator(JavaProject javaProject) {
++				return (o1, o2) -> 0;
++			}
++		},
+ 		;
+ 
+ 		abstract Comparator<ImportName> createContainerComparator(JavaProject javaProject);
+@@ -157,11 +180,24 @@
+ 		 */
+ 		JAVA_LANG_AND_CU_PACKAGE {
+ 			@Override
+-			Set<String> determineImplicitImportContainers(ICompilationUnit compilationUnit) {
++			Set<String> determineImplicitImportContainers(ICompilationUnit compilationUnit, CompilationUnit astRoot, String implicitPackageName) {
+ 				Set<String> implicitImportContainerNames = new HashSet<String>();
+ 
+ 				implicitImportContainerNames.add("java.lang"); //$NON-NLS-1$
+ 
++				if (implicitPackageName != null) {
++					implicitImportContainerNames.add(implicitPackageName);
++					return implicitImportContainerNames;
++				}
++
++				if (compilationUnit == null) {
++					PackageDeclaration packageDeclaration = astRoot.getPackage();
++					if (packageDeclaration != null) {
++						implicitImportContainerNames.add(packageDeclaration.getName().getFullyQualifiedName());
++					}
++					return implicitImportContainerNames;
++				}
++
+ 				IJavaElement packageFragment = compilationUnit.getParent();
+ 				String compilationUnitPackageName = packageFragment.getElementName();
+ 				if (compilationUnitPackageName.isEmpty() && !packageFragment.exists() && compilationUnit.exists()) {
+@@ -191,13 +227,13 @@
+ 		 */
+ 		NONE {
+ 			@Override
+-			Set<String> determineImplicitImportContainers(ICompilationUnit compilationUnit) {
++			Set<String> determineImplicitImportContainers(ICompilationUnit compilationUnit, CompilationUnit astRoot, String implicitPackageName) {
+ 				return Collections.emptySet();
+ 			}
+ 		},
+ 		;
+ 
+-		abstract Set<String> determineImplicitImportContainers(ICompilationUnit compilationUnit);
++		abstract Set<String> determineImplicitImportContainers(ICompilationUnit compilationUnit, CompilationUnit astRoot, String implicitPackageName);
+ 	}
+ 
+ 	public static class Builder {
+@@ -212,6 +248,7 @@
+ 		final OriginalImportHandling originalImportHandling;
+ 		ImportContainerSorting typeContainerSorting;
+ 		ImportContainerSorting staticContainerSorting;
++		String implicitPackageName;
+ 		ImplicitImportIdentification implicitImportIdentification;
+ 		List<String> importOrder;
+ 		Integer typeOnDemandThreshold;
+@@ -221,6 +258,7 @@
+ 			this.originalImportHandling = originalImportHandling;
+ 			this.typeContainerSorting = ImportContainerSorting.BY_PACKAGE;
+ 			this.staticContainerSorting = ImportContainerSorting.BY_PACKAGE_AND_CONTAINING_TYPE;
++			this.implicitPackageName = null;
+ 			this.implicitImportIdentification = ImplicitImportIdentification.JAVA_LANG_AND_CU_PACKAGE;
+ 			this.importOrder = Collections.emptyList();
+ 			this.typeOnDemandThreshold = null;
+@@ -237,6 +275,11 @@
+ 			return this;
+ 		}
+ 
++		public Builder setImplicitPackageName(String packageName) {
++			this.implicitPackageName = packageName;
++			return this;
++		}
++
+ 		public Builder setImplicitImportIdentification(ImplicitImportIdentification implicitImportIdentification) {
+ 			this.implicitImportIdentification = implicitImportIdentification;
+ 			return this;
+@@ -265,6 +308,7 @@
+ 	final OriginalImportHandling originalImportHandling;
+ 	final ImportContainerSorting typeContainerSorting;
+ 	final ImportContainerSorting staticContainerSorting;
++	final String implicitPackageName;
+ 	final ImplicitImportIdentification implicitImportIdentification;
+ 	final List<String> importOrder;
+ 	final int typeOnDemandThreshold;
+@@ -274,6 +318,7 @@
+ 		this.originalImportHandling = builder.originalImportHandling;
+ 		this.typeContainerSorting = builder.typeContainerSorting;
+ 		this.staticContainerSorting = builder.staticContainerSorting;
++		this.implicitPackageName = builder.implicitPackageName;
+ 		this.implicitImportIdentification = builder.implicitImportIdentification;
+ 		this.importOrder = builder.importOrder;
+ 		this.typeOnDemandThreshold = builder.typeOnDemandThreshold;

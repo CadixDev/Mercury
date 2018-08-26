@@ -1,0 +1,145 @@
+--- a/org/eclipse/jdt/internal/core/dom/rewrite/imports/ImportRewriteAnalyzer.java
++++ b/org/eclipse/jdt/internal/core/dom/rewrite/imports/ImportRewriteAnalyzer.java
+@@ -43,8 +43,11 @@
+ import org.eclipse.jdt.internal.core.JavaProject;
+ import org.eclipse.jdt.internal.core.dom.rewrite.imports.ConflictIdentifier.Conflicts;
+ import org.eclipse.jdt.internal.core.util.Util;
++import org.eclipse.jface.text.BadLocationException;
++import org.eclipse.jface.text.IDocument;
+ import org.eclipse.jface.text.IRegion;
+ import org.eclipse.jface.text.Region;
++import org.eclipse.jface.text.TextUtilities;
+ import org.eclipse.text.edits.TextEdit;
+ 
+ /**
+@@ -258,10 +261,10 @@
+ 	}
+ 
+ 	private static RewriteSite determineRewriteSite(
+-			CompilationUnit compilationUnit, List<OriginalImportEntry> originalImports) throws JavaModelException {
++			CompilationUnit compilationUnit, IDocument document, List<OriginalImportEntry> originalImports) throws JavaModelException {
+ 		IRegion importsRegion = determineImportsRegion(originalImports);
+ 
+-		IRegion surroundingRegion = determineSurroundingRegion(compilationUnit, importsRegion);
++		IRegion surroundingRegion = determineSurroundingRegion(compilationUnit, document, importsRegion);
+ 
+ 		boolean hasPrecedingElements = surroundingRegion.getOffset() != 0;
+ 
+@@ -299,7 +302,7 @@
+ 	 * Determines the region to be occupied by imports, their associated comments, and surrounding
+ 	 * whitespace.
+ 	 */
+-	private static IRegion determineSurroundingRegion(CompilationUnit compilationUnit, IRegion importsRegion) throws JavaModelException {
++	private static IRegion determineSurroundingRegion(CompilationUnit compilationUnit, IDocument document, IRegion importsRegion) throws JavaModelException {
+ 		NavigableMap<Integer, ASTNode> nodesTreeMap = mapTopLevelNodes(compilationUnit);
+ 
+ 		int surroundingStart;
+@@ -328,12 +331,24 @@
+ 		}
+ 
+ 		int surroundingEnd = positionAfterImports;
++		if (document != null) {
++			try {
++				int length = document.getLength();
++				while (surroundingEnd < length && Character.isWhitespace(document.getChar(surroundingEnd))) {
++					surroundingEnd++;
++				}
++			} catch (BadLocationException e) {
++				throw new RuntimeException(e);
++			}
++		} else {
+ 		IBuffer buffer = compilationUnit.getTypeRoot().getBuffer();
+ 		int length = buffer.getLength();
+ 		while (surroundingEnd < length && Character.isWhitespace(buffer.getChar(surroundingEnd))) {
+ 			surroundingEnd++;
+ 		}
++		}
+ 
++
+ 		return new Region(surroundingStart, surroundingEnd - surroundingStart);
+ 	}
+ 
+@@ -429,6 +444,7 @@
+ 	public ImportRewriteAnalyzer(
+ 			ICompilationUnit cu,
+ 			CompilationUnit astRoot,
++			IDocument document,
+ 			ImportRewriteConfiguration configuration) throws JavaModelException {
+ 		this.originalImportEntries = Collections.unmodifiableList(readOriginalImports(astRoot));
+ 
+@@ -457,7 +473,7 @@
+ 
+ 		ImportGroupComparator importGroupComparator = new ImportGroupComparator(configuration.importOrder);
+ 
+-		JavaProject javaProject = (JavaProject) cu.getJavaProject();
++		JavaProject javaProject = cu != null ? (JavaProject) cu.getJavaProject() : null;
+ 
+ 		this.importAdder = configuration.originalImportHandling.createImportAdder(new ImportComparator(
+ 				importGroupComparator,
+@@ -465,31 +481,39 @@
+ 				configuration.staticContainerSorting.createContainerComparator(javaProject)));
+ 
+ 		this.implicitImportContainerNames =
+-				configuration.implicitImportIdentification.determineImplicitImportContainers(cu);
++				configuration.implicitImportIdentification.determineImplicitImportContainers(cu, astRoot, configuration.implicitPackageName);
+ 
+ 		this.onDemandComputer = new OnDemandComputer(
+ 				configuration.typeOnDemandThreshold,
+ 				configuration.staticOnDemandThreshold);
+ 
++		if (cu != null) {
+ 		this.conflictIdentifier = new ConflictIdentifier(
+ 				this.onDemandComputer,
+ 				new TypeConflictingSimpleNameFinder(javaProject, new SearchEngine()),
+ 				new StaticConflictingSimpleNameFinder(javaProject),
+ 				this.implicitImportContainerNames);
++		} else {
++			this.conflictIdentifier = null; // TODO
++		}
+ 
+ 		this.importsByNameIdentity = mapImportsByNameIdentity(this.originalImportEntries);
+ 
+-		this.importDeclarationWriter = new ImportDeclarationWriter(shouldInsertSpaceBeforeSemicolon(javaProject));
++		this.importDeclarationWriter = new ImportDeclarationWriter(cu != null && shouldInsertSpaceBeforeSemicolon(javaProject));
+ 
++		if (cu != null) {
+ 		this.lineDelimiter = cu.findRecommendedLineSeparator();
++		} else {
++			this.lineDelimiter = TextUtilities.getDefaultLineDelimiter(document);
++		}
+ 
+ 		this.importEditor = new ImportEditor(
+ 				this.lineDelimiter,
+ 				configuration.originalImportHandling.shouldFixAllLineDelimiters(),
+-				getBlankLinesBetweenImportGroups(javaProject) + 1,
++				cu != null ? getBlankLinesBetweenImportGroups(javaProject) + 1 : 2,
+ 				importGroupComparator,
+ 				this.originalImportEntries,
+-				determineRewriteSite(astRoot, this.originalImportEntries),
++				determineRewriteSite(astRoot, document, this.originalImportEntries),
+ 				this.importDeclarationWriter);
+ 	}
+ 
+@@ -563,18 +587,18 @@
+ 
+ 		Set<ImportName> touchedContainers = determineTouchedContainers();
+ 
+-		Conflicts conflicts = this.conflictIdentifier.identifyConflicts(
++		Conflicts conflicts = this.conflictIdentifier != null ? this.conflictIdentifier.identifyConflicts(
+ 				importsWithAdditionsAndRemovals,
+ 				touchedContainers,
+ 				this.typeExplicitSimpleNames,
+ 				this.staticExplicitSimpleNames,
+-				progressMonitor);
++				progressMonitor) : null;
+ 
+ 		Set<String> allTypeExplicitSimpleNames = new HashSet<String>(this.typeExplicitSimpleNames);
+-		allTypeExplicitSimpleNames.addAll(conflicts.typeConflicts);
++		if (conflicts != null) allTypeExplicitSimpleNames.addAll(conflicts.typeConflicts);
+ 
+ 		Set<String> allStaticExplicitSimpleNames = new HashSet<String>(this.staticExplicitSimpleNames);
+-		allStaticExplicitSimpleNames.addAll(conflicts.staticConflicts);
++		if (conflicts != null) allStaticExplicitSimpleNames.addAll(conflicts.staticConflicts);
+ 
+ 		Set<ImportName> implicitImports = identifyImplicitImports(this.importsToAdd, allTypeExplicitSimpleNames);
+ 		List<ImportName> importsWithoutImplicits =
