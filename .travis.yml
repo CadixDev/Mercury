@@ -1,0 +1,11 @@
+sudo: false
+
+language: java
+jdk: openjdk8
+
+install: true
+script: ./gradlew build
+after_success: '[[ "$TRAVIS_BRANCH" = "develop" ]] && ./gradlew publish'
+
+notifications:
+  email: false
