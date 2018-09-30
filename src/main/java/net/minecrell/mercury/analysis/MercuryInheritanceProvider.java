@@ -18,6 +18,7 @@ import me.jamiemansfield.bombe.type.signature.MethodSignature;
 import net.minecrell.mercury.Mercury;
 import net.minecrell.mercury.util.BombeBindings;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -98,6 +99,12 @@ public class MercuryInheritanceProvider implements InheritanceProvider {
         public Map<FieldSignature, InheritanceType> getFields() {
             return Collections.unmodifiableMap(Arrays.stream(this.binding.getDeclaredFields())
                     .collect(Collectors.toMap(BombeBindings::convertSignature, f -> InheritanceType.fromModifiers(f.getModifiers()))));
+        }
+
+        @Override
+        public Map<String, InheritanceType> getFieldsByName() {
+            return Collections.unmodifiableMap(Arrays.stream(this.binding.getDeclaredFields())
+                    .collect(Collectors.toMap(IVariableBinding::getName, f -> InheritanceType.fromModifiers(f.getModifiers()))));
         }
 
         @Override
