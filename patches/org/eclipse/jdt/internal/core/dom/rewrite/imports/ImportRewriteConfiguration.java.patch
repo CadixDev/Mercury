@@ -1,6 +1,6 @@
 --- a/org/eclipse/jdt/internal/core/dom/rewrite/imports/ImportRewriteConfiguration.java
 +++ b/org/eclipse/jdt/internal/core/dom/rewrite/imports/ImportRewriteConfiguration.java
-@@ -21,6 +21,8 @@
+@@ -24,6 +24,8 @@
  import org.eclipse.jdt.core.IJavaElement;
  import org.eclipse.jdt.core.IPackageDeclaration;
  import org.eclipse.jdt.core.JavaModelException;
@@ -9,7 +9,7 @@
  import org.eclipse.jdt.internal.core.JavaProject;
  
  /**
-@@ -126,9 +128,30 @@
+@@ -129,9 +131,30 @@
  		BY_PACKAGE {
  			@Override
  			Comparator<ImportName> createContainerComparator(JavaProject javaProject) {
@@ -40,7 +40,7 @@
  		;
  
  		abstract Comparator<ImportName> createContainerComparator(JavaProject javaProject);
-@@ -157,11 +180,24 @@
+@@ -160,11 +183,24 @@
  		 */
  		JAVA_LANG_AND_CU_PACKAGE {
  			@Override
@@ -66,7 +66,7 @@
  				IJavaElement packageFragment = compilationUnit.getParent();
  				String compilationUnitPackageName = packageFragment.getElementName();
  				if (compilationUnitPackageName.isEmpty() && !packageFragment.exists() && compilationUnit.exists()) {
-@@ -191,13 +227,13 @@
+@@ -194,13 +230,13 @@
  		 */
  		NONE {
  			@Override
@@ -82,7 +82,7 @@
  	}
  
  	public static class Builder {
-@@ -212,6 +248,7 @@
+@@ -215,6 +251,7 @@
  		final OriginalImportHandling originalImportHandling;
  		ImportContainerSorting typeContainerSorting;
  		ImportContainerSorting staticContainerSorting;
@@ -90,7 +90,7 @@
  		ImplicitImportIdentification implicitImportIdentification;
  		List<String> importOrder;
  		Integer typeOnDemandThreshold;
-@@ -221,6 +258,7 @@
+@@ -224,6 +261,7 @@
  			this.originalImportHandling = originalImportHandling;
  			this.typeContainerSorting = ImportContainerSorting.BY_PACKAGE;
  			this.staticContainerSorting = ImportContainerSorting.BY_PACKAGE_AND_CONTAINING_TYPE;
@@ -98,7 +98,7 @@
  			this.implicitImportIdentification = ImplicitImportIdentification.JAVA_LANG_AND_CU_PACKAGE;
  			this.importOrder = Collections.emptyList();
  			this.typeOnDemandThreshold = null;
-@@ -237,6 +275,11 @@
+@@ -240,6 +278,11 @@
  			return this;
  		}
  
@@ -110,7 +110,7 @@
  		public Builder setImplicitImportIdentification(ImplicitImportIdentification implicitImportIdentification) {
  			this.implicitImportIdentification = implicitImportIdentification;
  			return this;
-@@ -265,6 +308,7 @@
+@@ -268,6 +311,7 @@
  	final OriginalImportHandling originalImportHandling;
  	final ImportContainerSorting typeContainerSorting;
  	final ImportContainerSorting staticContainerSorting;
@@ -118,7 +118,7 @@
  	final ImplicitImportIdentification implicitImportIdentification;
  	final List<String> importOrder;
  	final int typeOnDemandThreshold;
-@@ -274,6 +318,7 @@
+@@ -277,6 +321,7 @@
  		this.originalImportHandling = builder.originalImportHandling;
  		this.typeContainerSorting = builder.typeContainerSorting;
  		this.staticContainerSorting = builder.staticContainerSorting;

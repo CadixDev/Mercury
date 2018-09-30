@@ -1,6 +1,6 @@
 --- a/org/eclipse/jdt/internal/core/dom/rewrite/imports/ImportRewriteAnalyzer.java
 +++ b/org/eclipse/jdt/internal/core/dom/rewrite/imports/ImportRewriteAnalyzer.java
-@@ -43,8 +43,11 @@
+@@ -46,8 +46,11 @@
  import org.eclipse.jdt.internal.core.JavaProject;
  import org.eclipse.jdt.internal.core.dom.rewrite.imports.ConflictIdentifier.Conflicts;
  import org.eclipse.jdt.internal.core.util.Util;
@@ -12,7 +12,7 @@
  import org.eclipse.text.edits.TextEdit;
  
  /**
-@@ -258,10 +261,10 @@
+@@ -261,10 +264,10 @@
  	}
  
  	private static RewriteSite determineRewriteSite(
@@ -25,7 +25,7 @@
  
  		boolean hasPrecedingElements = surroundingRegion.getOffset() != 0;
  
-@@ -299,7 +302,7 @@
+@@ -302,7 +305,7 @@
  	 * Determines the region to be occupied by imports, their associated comments, and surrounding
  	 * whitespace.
  	 */
@@ -34,7 +34,7 @@
  		NavigableMap<Integer, ASTNode> nodesTreeMap = mapTopLevelNodes(compilationUnit);
  
  		int surroundingStart;
-@@ -328,12 +331,24 @@
+@@ -331,12 +334,24 @@
  		}
  
  		int surroundingEnd = positionAfterImports;
@@ -59,7 +59,7 @@
  		return new Region(surroundingStart, surroundingEnd - surroundingStart);
  	}
  
-@@ -429,6 +444,7 @@
+@@ -432,6 +447,7 @@
  	public ImportRewriteAnalyzer(
  			ICompilationUnit cu,
  			CompilationUnit astRoot,
@@ -67,7 +67,7 @@
  			ImportRewriteConfiguration configuration) throws JavaModelException {
  		this.originalImportEntries = Collections.unmodifiableList(readOriginalImports(astRoot));
  
-@@ -457,7 +473,7 @@
+@@ -460,7 +476,7 @@
  
  		ImportGroupComparator importGroupComparator = new ImportGroupComparator(configuration.importOrder);
  
@@ -76,7 +76,7 @@
  
  		this.importAdder = configuration.originalImportHandling.createImportAdder(new ImportComparator(
  				importGroupComparator,
-@@ -465,31 +481,39 @@
+@@ -468,31 +484,39 @@
  				configuration.staticContainerSorting.createContainerComparator(javaProject)));
  
  		this.implicitImportContainerNames =
@@ -120,7 +120,7 @@
  				this.importDeclarationWriter);
  	}
  
-@@ -563,18 +587,18 @@
+@@ -566,18 +590,18 @@
  
  		Set<ImportName> touchedContainers = determineTouchedContainers();
  

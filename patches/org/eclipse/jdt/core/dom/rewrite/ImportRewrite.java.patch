@@ -1,6 +1,6 @@
 --- a/org/eclipse/jdt/core/dom/rewrite/ImportRewrite.java
 +++ b/org/eclipse/jdt/core/dom/rewrite/ImportRewrite.java
-@@ -58,6 +58,7 @@
+@@ -61,6 +61,7 @@
  import org.eclipse.jdt.core.dom.Modifier;
  import org.eclipse.jdt.core.dom.Name;
  import org.eclipse.jdt.core.dom.NormalAnnotation;
@@ -8,7 +8,7 @@
  import org.eclipse.jdt.core.dom.ParameterizedType;
  import org.eclipse.jdt.core.dom.PrimitiveType;
  import org.eclipse.jdt.core.dom.SimpleName;
-@@ -73,6 +74,7 @@
+@@ -76,6 +77,7 @@
  import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteConfiguration.ImportContainerSorting;
  import org.eclipse.jdt.internal.core.util.Messages;
  import org.eclipse.jdt.internal.core.util.Util;
@@ -16,7 +16,7 @@
  import org.eclipse.text.edits.MultiTextEdit;
  import org.eclipse.text.edits.TextEdit;
  
-@@ -320,6 +322,9 @@
+@@ -323,6 +325,9 @@
  	private final ICompilationUnit compilationUnit;
  	private final CompilationUnit astRoot;
  
@@ -26,7 +26,7 @@
  	private final boolean restoreExistingImports;
  	private final List existingImports;
  	private final Map importsKindMap;
-@@ -381,9 +386,8 @@
+@@ -384,9 +389,8 @@
  	}
  
  	/**
@@ -38,7 +38,7 @@
  	 * will be inserted at best matching locations. If <code>restoreExistingImports</code> is <code>false</code>, the
  	 * existing imports will be removed and only the newly added imports will be created.
  	 * <p>
-@@ -392,14 +396,14 @@
+@@ -395,14 +399,14 @@
  	 * @param astRoot the AST root node to create the imports for
  	 * @param restoreExistingImports specifies if the existing imports should be kept or removed.
  	 * @return the created import rewriter.
@@ -55,7 +55,7 @@
  			throw new IllegalArgumentException("AST must have been constructed from a Java element"); //$NON-NLS-1$
  		}
  		List existingImport= null;
-@@ -422,7 +426,7 @@
+@@ -425,7 +429,7 @@
  	}
  
  	private ImportRewrite(ICompilationUnit cu, CompilationUnit astRoot, List existingImports) {
@@ -64,7 +64,7 @@
  		this.astRoot= astRoot; // might be null
  		if (existingImports != null) {
  			this.existingImports= existingImports;
-@@ -455,8 +459,33 @@
+@@ -458,8 +462,33 @@
  		this.importsKindMap = new HashMap();
  	}
  
@@ -98,7 +98,7 @@
  	 * Defines the import groups and order to be used by the {@link ImportRewrite}.
  	 * Imports are added to the group matching their qualified name most. The empty group name groups all imports not matching
  	 * any other group. Static imports are managed in separate groups. Static import group names are prefixed with a '#' character.
-@@ -503,7 +532,8 @@
+@@ -506,7 +535,8 @@
  
  	/**
  	 * The compilation unit for which this import rewrite was created for.
@@ -108,7 +108,7 @@
  	 */
  	public ICompilationUnit getCompilationUnit() {
  		return this.compilationUnit;
-@@ -608,15 +638,38 @@
+@@ -611,15 +641,38 @@
  			}
  		}
  
@@ -150,7 +150,7 @@
  				
  				if (this.astRoot != null) {
  					List<AbstractTypeDeclaration> types = this.astRoot.types();
-@@ -1301,7 +1354,28 @@
+@@ -1304,7 +1357,28 @@
  	 * @throws CoreException the exception is thrown if the rewrite fails.
  	 */
  	public final TextEdit rewriteImports(IProgressMonitor monitor) throws CoreException {
@@ -179,7 +179,7 @@
  		SubMonitor subMonitor = SubMonitor.convert(monitor,
  				Messages.bind(Messages.importRewrite_processDescription), 2);
  		if (!hasRecordedChanges()) {
-@@ -1322,7 +1396,7 @@
+@@ -1325,7 +1399,7 @@
  		ImportRewriteConfiguration config= buildImportRewriteConfiguration();
  
  		ImportRewriteAnalyzer computer=
@@ -188,7 +188,7 @@
  
  		for (String addedImport : this.addedImports) {
  			boolean isStatic = STATIC_PREFIX == addedImport.charAt(0);
-@@ -1365,11 +1439,17 @@
+@@ -1368,11 +1442,17 @@
  		configBuilder.setTypeOnDemandThreshold(this.importOnDemandThreshold);
  		configBuilder.setStaticOnDemandThreshold(this.staticImportOnDemandThreshold);
  
