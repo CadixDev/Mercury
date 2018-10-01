@@ -43,7 +43,7 @@ public class MercuryInheritanceProvider implements InheritanceProvider {
 
     @Override
     public Optional<ClassInfo> provide(String klass) {
-        throw new UnsupportedOperationException(); // TODO
+        return this.mercury.createTypeBinding(klass).map(this::provide);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class MercuryInheritanceProvider implements InheritanceProvider {
     }
 
     public ClassInfo provide(ITypeBinding binding) {
-        return new BindingClassInfo(binding).lazy();
+        return new BindingClassInfo(binding.getErasure()).lazy();
     }
 
     private static class BindingClassInfo extends ClassInfo.Abstract {

@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FileASTRequestor;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class Mercury {
@@ -50,7 +53,7 @@ public final class Mercury {
     private final FileASTRequestor requestor = new Requestor();
 
     public String getSourceCompatibility() {
-        return sourceCompatibility;
+        return this.sourceCompatibility;
     }
 
     public void setSourceCompatibility(String sourceCompatibility) {
@@ -58,7 +61,7 @@ public final class Mercury {
     }
 
     public Charset getEncoding() {
-        return encoding;
+        return this.encoding;
     }
 
     public void setEncoding(Charset encoding) {
@@ -66,27 +69,50 @@ public final class Mercury {
     }
 
     public List<Path> getClassPath() {
-        return classPath;
+        return this.classPath;
     }
 
     public List<Path> getSourcePath() {
-        return sourcePath;
+        return this.sourcePath;
     }
 
     public List<SourceProcessor> getProcessors() {
-        return processors;
+        return this.processors;
     }
 
     public Path getSourceDir() {
-        return sourceDir;
+        return this.sourceDir;
     }
 
     public Path getOutputDir() {
-        return outputDir;
+        return this.outputDir;
     }
 
     public Map<Object, Object> getContext() {
-        return context;
+        return this.context;
+    }
+
+    public Optional<ITypeBinding> createTypeBinding(String className) {
+        if (isAnonymousOrLocalType(className)) {
+            // TODO: Anonymous or local types are currently not supported
+            // Eclipse uses source lines in their binding keys that are impossible
+            // to know in advance. Since it may return incorrect results, abort early.
+            return Optional.empty();
+        }
+
+        IBinding binding = this.requestor.createBindings(new String[]{'L' + className.replace('.', '/') + ';'})[0];
+        return binding != null && binding.getKind() == IBinding.TYPE ? Optional.of((ITypeBinding) binding) : Optional.empty();
+    }
+
+    private static boolean isAnonymousOrLocalType(String className) {
+        int i = className.indexOf('$') + 1;
+        while (i > 0 && i < className.length()) {
+            if (Character.isDigit(className.charAt(i))) {
+                return true;
+            }
+            i = className.indexOf('$', i) + 1;
+        }
+        return false;
     }
 
     public void process(Path sourceDir) throws Exception {
