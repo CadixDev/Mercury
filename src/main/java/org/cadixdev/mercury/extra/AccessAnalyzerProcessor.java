@@ -8,22 +8,22 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package net.minecrell.mercury.extra;
+package org.cadixdev.mercury.extra;
 
-import static net.minecrell.mercury.util.BombeBindings.convertSignature;
-import static net.minecrell.mercury.util.BombeBindings.isPackagePrivate;
+import static org.cadixdev.mercury.util.BombeBindings.convertSignature;
+import static org.cadixdev.mercury.util.BombeBindings.isPackagePrivate;
 
-import me.jamiemansfield.bombe.analysis.InheritanceProvider;
-import me.jamiemansfield.bombe.type.signature.MethodSignature;
-import me.jamiemansfield.lorenz.MappingSet;
-import me.jamiemansfield.lorenz.model.ClassMapping;
-import net.minecrell.at.AccessChange;
-import net.minecrell.at.AccessTransform;
-import net.minecrell.at.AccessTransformSet;
-import net.minecrell.at.ModifierChange;
-import net.minecrell.mercury.SourceContext;
-import net.minecrell.mercury.SourceProcessor;
-import net.minecrell.mercury.analysis.MercuryInheritanceProvider;
+import org.cadixdev.at.AccessChange;
+import org.cadixdev.at.AccessTransform;
+import org.cadixdev.at.AccessTransformSet;
+import org.cadixdev.at.ModifierChange;
+import org.cadixdev.bombe.analysis.InheritanceProvider;
+import org.cadixdev.bombe.type.signature.MethodSignature;
+import org.cadixdev.lorenz.MappingSet;
+import org.cadixdev.lorenz.model.ClassMapping;
+import org.cadixdev.mercury.SourceContext;
+import org.cadixdev.mercury.SourceProcessor;
+import org.cadixdev.mercury.analysis.MercuryInheritanceProvider;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;

@@ -8,17 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package net.minecrell.mercury.remapper;
+package org.cadixdev.mercury.remapper;
 
-import static net.minecrell.mercury.util.BombeBindings.isPackagePrivate;
+import static org.cadixdev.mercury.util.BombeBindings.isPackagePrivate;
 
-import me.jamiemansfield.lorenz.MappingSet;
-import me.jamiemansfield.lorenz.model.ClassMapping;
-import me.jamiemansfield.lorenz.model.InnerClassMapping;
-import me.jamiemansfield.lorenz.model.Mapping;
-import me.jamiemansfield.lorenz.model.TopLevelClassMapping;
-import net.minecrell.mercury.RewriteContext;
-import net.minecrell.mercury.jdt.rewrite.imports.ImportRewrite;
+import org.cadixdev.lorenz.MappingSet;
+import org.cadixdev.lorenz.model.ClassMapping;
+import org.cadixdev.lorenz.model.InnerClassMapping;
+import org.cadixdev.lorenz.model.Mapping;
+import org.cadixdev.lorenz.model.TopLevelClassMapping;
+import org.cadixdev.mercury.RewriteContext;
+import org.cadixdev.mercury.jdt.rewrite.imports.ImportRewrite;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;

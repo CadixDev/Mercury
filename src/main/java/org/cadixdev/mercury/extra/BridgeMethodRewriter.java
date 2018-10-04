@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package net.minecrell.mercury.extra;
+package org.cadixdev.mercury.extra;
 
-import net.minecrell.mercury.RewriteContext;
-import net.minecrell.mercury.SourceRewriter;
+import org.cadixdev.mercury.RewriteContext;
+import org.cadixdev.mercury.SourceRewriter;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;

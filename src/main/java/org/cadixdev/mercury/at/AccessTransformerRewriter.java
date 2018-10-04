@@ -8,19 +8,19 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package net.minecrell.mercury.at;
+package org.cadixdev.mercury.at;
 
-import static net.minecrell.mercury.util.BombeBindings.convertSignature;
+import static org.cadixdev.mercury.util.BombeBindings.convertSignature;
 
-import me.jamiemansfield.bombe.analysis.InheritanceProvider;
-import me.jamiemansfield.bombe.type.signature.MethodSignature;
-import net.minecrell.at.AccessChange;
-import net.minecrell.at.AccessTransform;
-import net.minecrell.at.AccessTransformSet;
-import net.minecrell.at.ModifierChange;
-import net.minecrell.mercury.RewriteContext;
-import net.minecrell.mercury.SourceRewriter;
-import net.minecrell.mercury.analysis.MercuryInheritanceProvider;
+import org.cadixdev.at.AccessChange;
+import org.cadixdev.at.AccessTransform;
+import org.cadixdev.at.AccessTransformSet;
+import org.cadixdev.at.ModifierChange;
+import org.cadixdev.bombe.analysis.InheritanceProvider;
+import org.cadixdev.bombe.type.signature.MethodSignature;
+import org.cadixdev.mercury.RewriteContext;
+import org.cadixdev.mercury.SourceRewriter;
+import org.cadixdev.mercury.analysis.MercuryInheritanceProvider;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;

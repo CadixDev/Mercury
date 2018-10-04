@@ -8,11 +8,11 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package net.minecrell.mercury;
+package org.cadixdev.mercury;
 
-import static net.minecrell.mercury.Mercury.JAVA_EXTENSION;
+import static org.cadixdev.mercury.Mercury.JAVA_EXTENSION;
 
-import net.minecrell.mercury.jdt.rewrite.imports.ImportRewrite;
+import org.cadixdev.mercury.jdt.rewrite.imports.ImportRewrite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;

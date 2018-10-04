@@ -8,7 +8,8 @@ plugins {
     id("net.minecrell.licenser") version "0.4.1"
 }
 
-base.archivesBaseName = name.toLowerCase()
+val artifactId = name.toLowerCase()
+base.archivesBaseName = artifactId
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -30,14 +31,14 @@ dependencies {
     api(jdt)
 
     // TODO: Split in separate modules
-    api("net.minecrell:at:0.1.0-SNAPSHOT")
-    api("me.jamiemansfield:lorenz:0.5.0-SNAPSHOT")
+    api("org.cadixdev:at:0.1.0-SNAPSHOT")
+    api("org.cadixdev:lorenz:0.5.0-SNAPSHOT")
 
     "jdt"("$jdt:sources")
 }
 
 tasks.withType<Javadoc> {
-    exclude("net/minecrell/mercury/jdt/")
+    exclude("${project.group}.$artifactId.jdt.".replace('.', '/'))
 }
 
 // Patched ImportRewrite from JDT
@@ -59,8 +60,8 @@ val extract = task<Copy>("extractJdt") {
 tasks["applyPatches"].inputs.files(extract)
 
 val renames = listOf(
-        "org.eclipse.jdt.core.dom.rewrite" to "net.minecrell.mercury.jdt.rewrite.imports",
-        "org.eclipse.jdt.internal.core.dom.rewrite.imports" to "net.minecrell.mercury.jdt.internal.rewrite.imports"
+        "org.eclipse.jdt.core.dom.rewrite" to "$group.$artifactId.jdt.rewrite.imports",
+        "org.eclipse.jdt.internal.core.dom.rewrite.imports" to "$group.$artifactId.jdt.internal.rewrite.imports"
 )
 
 fun createRenameTask(prefix: String, inputDir: File, outputDir: File, renames: List<Pair<String, String>>): Task
@@ -103,7 +104,7 @@ artifacts {
 
 license {
     header = file("HEADER")
-    exclude("net/minecrell/mercury/jdt/")
+    exclude("$group.$artifactId.jdt.".replace('.', '/'))
 }
 
 val isSnapshot = version.toString().endsWith("-SNAPSHOT")

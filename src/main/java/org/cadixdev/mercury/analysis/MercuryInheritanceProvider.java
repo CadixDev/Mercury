@@ -8,15 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package net.minecrell.mercury.analysis;
+package org.cadixdev.mercury.analysis;
 
-import me.jamiemansfield.bombe.analysis.CachingInheritanceProvider;
-import me.jamiemansfield.bombe.analysis.InheritanceProvider;
-import me.jamiemansfield.bombe.analysis.InheritanceType;
-import me.jamiemansfield.bombe.type.signature.FieldSignature;
-import me.jamiemansfield.bombe.type.signature.MethodSignature;
-import net.minecrell.mercury.Mercury;
-import net.minecrell.mercury.util.BombeBindings;
+import org.cadixdev.bombe.analysis.CachingInheritanceProvider;
+import org.cadixdev.bombe.analysis.InheritanceProvider;
+import org.cadixdev.bombe.analysis.InheritanceType;
+import org.cadixdev.bombe.type.signature.FieldSignature;
+import org.cadixdev.bombe.type.signature.MethodSignature;
+import org.cadixdev.mercury.Mercury;
+import org.cadixdev.mercury.util.BombeBindings;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 

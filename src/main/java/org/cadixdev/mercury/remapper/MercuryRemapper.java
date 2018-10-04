@@ -8,11 +8,11 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package net.minecrell.mercury.remapper;
+package org.cadixdev.mercury.remapper;
 
-import me.jamiemansfield.lorenz.MappingSet;
-import net.minecrell.mercury.RewriteContext;
-import net.minecrell.mercury.SourceRewriter;
+import org.cadixdev.lorenz.MappingSet;
+import org.cadixdev.mercury.RewriteContext;
+import org.cadixdev.mercury.SourceRewriter;
 
 import java.util.Objects;
 

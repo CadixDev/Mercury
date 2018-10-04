@@ -8,17 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package net.minecrell.mercury.remapper;
+package org.cadixdev.mercury.remapper;
 
-import static net.minecrell.mercury.util.BombeBindings.convertSignature;
+import static org.cadixdev.mercury.util.BombeBindings.convertSignature;
 
-import me.jamiemansfield.bombe.analysis.InheritanceProvider;
-import me.jamiemansfield.lorenz.MappingSet;
-import me.jamiemansfield.lorenz.model.ClassMapping;
-import me.jamiemansfield.lorenz.model.FieldMapping;
-import me.jamiemansfield.lorenz.model.MethodMapping;
-import net.minecrell.mercury.RewriteContext;
-import net.minecrell.mercury.analysis.MercuryInheritanceProvider;
+import org.cadixdev.bombe.analysis.InheritanceProvider;
+import org.cadixdev.lorenz.MappingSet;
+import org.cadixdev.lorenz.model.ClassMapping;
+import org.cadixdev.lorenz.model.FieldMapping;
+import org.cadixdev.lorenz.model.MethodMapping;
+import org.cadixdev.mercury.RewriteContext;
+import org.cadixdev.mercury.analysis.MercuryInheritanceProvider;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;

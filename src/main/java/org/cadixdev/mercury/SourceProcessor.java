@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package net.minecrell.mercury;
+package org.cadixdev.mercury;
 
 public interface SourceProcessor {
 

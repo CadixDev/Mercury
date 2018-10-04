@@ -8,16 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package net.minecrell.mercury.util;
+package org.cadixdev.mercury.util;
 
-import me.jamiemansfield.bombe.type.ArrayType;
-import me.jamiemansfield.bombe.type.FieldType;
-import me.jamiemansfield.bombe.type.MethodDescriptor;
-import me.jamiemansfield.bombe.type.ObjectType;
-import me.jamiemansfield.bombe.type.PrimitiveType;
-import me.jamiemansfield.bombe.type.Type;
-import me.jamiemansfield.bombe.type.signature.FieldSignature;
-import me.jamiemansfield.bombe.type.signature.MethodSignature;
+import org.cadixdev.bombe.type.ArrayType;
+import org.cadixdev.bombe.type.FieldType;
+import org.cadixdev.bombe.type.MethodDescriptor;
+import org.cadixdev.bombe.type.ObjectType;
+import org.cadixdev.bombe.type.PrimitiveType;
+import org.cadixdev.bombe.type.Type;
+import org.cadixdev.bombe.type.signature.FieldSignature;
+import org.cadixdev.bombe.type.signature.MethodSignature;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
