@@ -43,6 +43,10 @@ import java.util.Objects;
  */
 public final class AccessAnalyzerProcessor implements SourceProcessor {
 
+    public static AccessAnalyzerProcessor create(AccessTransformSet ats, MappingSet mappings) {
+        return new AccessAnalyzerProcessor(ats, mappings);
+    }
+
     private final AccessTransformSet ats;
     private final MappingSet mappings;
 
