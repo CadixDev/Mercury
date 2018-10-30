@@ -120,7 +120,7 @@ public final class AccessAnalyzerProcessor implements SourceProcessor {
                 return false;
             }
 
-            ClassMapping<?> mapping = this.mappings.getClassMapping(declaringClass.getBinaryName()).orElse(null);
+            ClassMapping<?, ?> mapping = this.mappings.getClassMapping(declaringClass.getBinaryName()).orElse(null);
 
             String packageName;
             if (mapping != null) {

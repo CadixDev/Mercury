@@ -82,7 +82,7 @@ class RemapperVisitor extends SimpleRemapperVisitor {
             return;
         }
 
-        ClassMapping<?> mapping = this.mappings.computeClassMapping(binding.getBinaryName()).orElse(null);
+        ClassMapping<?, ?> mapping = this.mappings.computeClassMapping(binding.getBinaryName()).orElse(null);
 
         if (node.getParent() instanceof AbstractTypeDeclaration || binding.isLocal()) {
             if (mapping != null) {
@@ -121,7 +121,7 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     }
 
     private void remapInnerType(QualifiedName qualifiedName, ITypeBinding outerClass) {
-        ClassMapping<?> outerClassMapping = this.mappings.computeClassMapping(outerClass.getBinaryName()).orElse(null);
+        ClassMapping<?, ?> outerClassMapping = this.mappings.computeClassMapping(outerClass.getBinaryName()).orElse(null);
         if (outerClassMapping == null) {
             return;
         }
@@ -202,7 +202,7 @@ class RemapperVisitor extends SimpleRemapperVisitor {
                 case IBinding.TYPE:
                     ITypeBinding typeBinding = (ITypeBinding) binding;
                     String name = typeBinding.getBinaryName();
-                    ClassMapping<?> mapping = this.mappings.computeClassMapping(name).orElse(null);
+                    ClassMapping<?, ?> mapping = this.mappings.computeClassMapping(name).orElse(null);
                     if (mapping != null && !name.equals(mapping.getFullDeobfuscatedName().replace('/', '.'))) {
                         this.importRewrite.removeImport(typeBinding.getQualifiedName());
                     }
@@ -234,7 +234,7 @@ class RemapperVisitor extends SimpleRemapperVisitor {
                 }
             }
 
-            ClassMapping<?> mapping = this.mappings.getClassMapping(inner.getBinaryName()).orElse(null);
+            ClassMapping<?, ?> mapping = this.mappings.getClassMapping(inner.getBinaryName()).orElse(null);
 
             if (isPackagePrivate(modifiers)) {
                 // Must come from the same package
