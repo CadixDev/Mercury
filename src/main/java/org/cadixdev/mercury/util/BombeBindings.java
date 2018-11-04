@@ -28,6 +28,8 @@ import java.util.List;
 
 public final class BombeBindings {
 
+    private static final String BINARY_CONSTRUCTOR_NAME = "<init>";
+
     private BombeBindings() {
     }
 
@@ -47,6 +49,14 @@ public final class BombeBindings {
         return new ObjectType(binding.getErasure().getBinaryName());
     }
 
+    private static String getBinaryName(IMethodBinding binding) {
+        if (binding.isConstructor()) {
+            return BINARY_CONSTRUCTOR_NAME;
+        } else {
+            return binding.getName();
+        }
+    }
+
     public static MethodSignature convertSignature(IMethodBinding binding) {
         ITypeBinding[] parameterBindings = binding.getParameterTypes();
         List<FieldType> parameters = new ArrayList<>(parameterBindings.length);
@@ -55,7 +65,7 @@ public final class BombeBindings {
             parameters.add((FieldType) convertType(parameterBinding));
         }
 
-        return new MethodSignature(binding.getName(), new MethodDescriptor(parameters, convertType(binding.getReturnType())));
+        return new MethodSignature(getBinaryName(binding), new MethodDescriptor(parameters, convertType(binding.getReturnType())));
     }
 
     public static FieldSignature convertSignature(IVariableBinding binding) {
