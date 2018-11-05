@@ -58,15 +58,18 @@ class RemapperVisitor extends SimpleRemapperVisitor {
             context.setPackageName(primary.getDeobfuscatedPackage().replace('/', '.'));
             this.importRewrite.setImplicitPackageName(context.getPackageName());
 
+            String simpleDeobfuscatedName = primary.getSimpleDeobfuscatedName();
+            context.setPrimaryType(simpleDeobfuscatedName);
+
             List<String> implicitTypes = new ArrayList<>();
-            String simpleName = primary.getSimpleObfuscatedName();
+            String simpleObfuscatedName = primary.getSimpleObfuscatedName();
 
             @SuppressWarnings("unchecked")
             List<AbstractTypeDeclaration> types = context.getCompilationUnit().types();
             for (AbstractTypeDeclaration type : types) {
                 String name = type.getName().getIdentifier();
-                if (name.equals(simpleName)) {
-                    implicitTypes.add(primary.getSimpleDeobfuscatedName());
+                if (name.equals(simpleObfuscatedName)) {
+                    implicitTypes.add(simpleDeobfuscatedName);
                 } else {
                     implicitTypes.add(mappings.getTopLevelClassMapping(context.getPackageName() + '.' + name)
                         .map(Mapping::getSimpleDeobfuscatedName)
