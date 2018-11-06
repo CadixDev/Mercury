@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -104,14 +105,6 @@ public final class RewriteContext extends SourceContext {
     void process(List<SourceProcessor> processors) throws Exception {
         super.process(processors);
 
-        TextEdit edit = rewrite();
-        if (edit == null) {
-            return;
-        }
-
-        Document document = loadDocument();
-        edit.apply(document, TextEdit.NONE);
-
         Path outputDir = getMercury().getOutputDir();
 
         String path = this.primaryType + JAVA_EXTENSION;
@@ -128,6 +121,18 @@ public final class RewriteContext extends SourceContext {
 
         Path outputFile = outputDir.resolve(path);
         Files.createDirectories(outputFile.getParent());
+
+        TextEdit edit = rewrite();
+        if (edit == null) {
+            // Copy original source file
+            Files.copy(getSourceFile(), outputFile, StandardCopyOption.REPLACE_EXISTING);
+            return;
+        }
+
+        // Save the rewritten source file
+        Document document = loadDocument();
+        edit.apply(document, TextEdit.NONE);
+
         try (OutputStreamWriter writer = new OutputStreamWriter(Files.newOutputStream(outputFile), getMercury().getEncoding())) {
             writer.write(document.get());
         }
