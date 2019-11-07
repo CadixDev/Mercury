@@ -174,7 +174,7 @@ public final class Mercury {
 
         // Walk directory to find source files
         String[] sourceFiles = toArray(Files.walk(this.sourceDir)
-                .filter(p -> p.getFileName().toString().endsWith(JAVA_EXTENSION)));
+                .filter(p -> p.getFileName() != null && p.getFileName().toString().endsWith(JAVA_EXTENSION)));
 
         for (SourceProcessor processor : this.processors) {
             processor.initialize(this);
