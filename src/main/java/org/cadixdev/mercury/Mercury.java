@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -173,7 +174,7 @@ public final class Mercury {
         parser.setEnvironment(toArray(this.classPath.stream()), sourcePath, getEncodings(sourcePath), true);
 
         // Walk directory to find source files
-        String[] sourceFiles = toArray(Files.walk(this.sourceDir)
+        String[] sourceFiles = toArray(Files.walk(this.sourceDir, FileVisitOption.FOLLOW_LINKS)
                 .filter(p -> p.getFileName() != null && p.getFileName().toString().endsWith(JAVA_EXTENSION)));
 
         for (SourceProcessor processor : this.processors) {
