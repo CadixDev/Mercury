@@ -199,6 +199,11 @@ class RemapperVisitor extends SimpleRemapperVisitor {
 
     @Override
     public boolean visit(ImportDeclaration node) {
+        if (node.isStatic()) {
+            // Remap class/member reference separately
+            return true;
+        }
+
         IBinding binding = node.resolveBinding();
         if (binding != null) {
             switch (binding.getKind()) {
