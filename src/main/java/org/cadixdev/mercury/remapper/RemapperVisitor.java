@@ -109,6 +109,9 @@ class RemapperVisitor extends SimpleRemapperVisitor {
 
     private void remapQualifiedType(QualifiedName node, ITypeBinding binding) {
         String binaryName = binding.getBinaryName();
+        if (binaryName == null) {
+            throw new IllegalStateException("No binary name for " + binding.getQualifiedName());
+        }
         TopLevelClassMapping mapping = this.mappings.getTopLevelClassMapping(binaryName).orElse(null);
 
         if (mapping == null) {
@@ -124,6 +127,10 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     }
 
     private void remapInnerType(QualifiedName qualifiedName, ITypeBinding outerClass) {
+        if (outerClass.getBinaryName() == null) {
+            throw new IllegalStateException("No binary name for " + outerClass.getQualifiedName());
+        }
+
         ClassMapping<?, ?> outerClassMapping = this.mappings.computeClassMapping(outerClass.getBinaryName()).orElse(null);
         if (outerClassMapping == null) {
             return;
@@ -160,6 +167,10 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     @Override
     public boolean visit(QualifiedName node) {
         IBinding binding = node.resolveBinding();
+        if (binding == null) {
+            throw new IllegalStateException("No binding for qualified name node " + node.getFullyQualifiedName());
+        }
+
         if (binding.getKind() != IBinding.TYPE) {
             // Unpack the qualified name and remap method/field and type separately
             return true;
@@ -213,6 +224,10 @@ class RemapperVisitor extends SimpleRemapperVisitor {
                 case IBinding.TYPE:
                     ITypeBinding typeBinding = (ITypeBinding) binding;
                     String name = typeBinding.getBinaryName();
+                    if (name == null) {
+                        throw new IllegalStateException("No binary name for " + typeBinding.getQualifiedName() + ". Did you add the library to the classpath?");
+                    }
+
                     ClassMapping<?, ?> mapping = this.mappings.computeClassMapping(name).orElse(null);
                     if (mapping != null && !name.equals(mapping.getFullDeobfuscatedName().replace('/', '.'))) {
                         this.importRewrite.removeImport(typeBinding.getQualifiedName());
