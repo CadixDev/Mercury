@@ -190,7 +190,9 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     public boolean visit(PackageDeclaration node) {
         String currentPackage = node.getName().getFullyQualifiedName();
 
-        if (!currentPackage.equals(this.context.getPackageName())) {
+        if (this.context.getPackageName().length() == 0) {
+           this.context.createASTRewrite().remove(node, null); // no package name -> no package declaration!
+        } else if (!currentPackage.equals(this.context.getPackageName())) {
             this.context.createASTRewrite().replace(node.getName(), node.getAST().newName(this.context.getPackageName()), null);
         }
 
