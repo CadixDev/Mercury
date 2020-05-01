@@ -109,6 +109,9 @@ class RemapperVisitor extends SimpleRemapperVisitor {
 
     private void remapQualifiedType(QualifiedName node, ITypeBinding binding) {
         String binaryName = binding.getBinaryName();
+        if (binaryName == null) {
+            throw new IllegalStateException("No binary name for " + binding.getQualifiedName());
+        }
         TopLevelClassMapping mapping = this.mappings.getTopLevelClassMapping(binaryName).orElse(null);
 
         if (mapping == null) {
@@ -124,6 +127,10 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     }
 
     private void remapInnerType(QualifiedName qualifiedName, ITypeBinding outerClass) {
+        if (outerClass.getBinaryName() == null) {
+            throw new IllegalStateException("No binary name for " + outerClass.getQualifiedName());
+        }
+
         ClassMapping<?, ?> outerClassMapping = this.mappings.computeClassMapping(outerClass.getBinaryName()).orElse(null);
         if (outerClassMapping == null) {
             return;
