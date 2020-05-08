@@ -1,0 +1,3 @@
+test/ObfClass Core
+	name firstName
+	name ()Ljava/lang/String; firstName
