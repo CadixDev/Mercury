@@ -1,3 +1,10 @@
+# Test 1. Simple remaps
 test/ObfClass Core
 	name firstName
 	name ()Ljava/lang/String; firstName
+
+# Test 2. Remap overrides
+OverrideParent OverrideParent
+	abc ()Ljava/lang/Object; get
+	bcd ()Ljava/lang/Object; fetch
+	cde (Ljava/lang/Object;)V set

@@ -32,6 +32,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RemappingTests {
 
+    // Mercury contains the following tests:
+    // 1. Simple remaps
+    //    This test is used to verify that Mercury can remap simple things:
+    //      - Mercury can remap simple classes, fields, and methods
+    //      - Mercury will remove package declarations when remapping to the
+    //        root package (GH-11)
+    // 2. Method overriding and generics
+    //    This test is used to verify that Mercury can handle child classes
+    //    overriding methods from their parents:
+    //      - Mercury will remap methods with their return type raised (GH-14)
+    //      - Mercury can handle generic return types, and parameters (GH-8).
+
     @Test
     void remap() throws Exception {
         final Path tempDir = Files.createTempDirectory("mercury-test");
@@ -41,7 +53,11 @@ class RemappingTests {
         Files.createDirectories(out);
 
         // Copy our test classes to the virtual file system
+        // - Test 1
         this.copy(in, "test/ObfClass.java");
+        // - Test 2
+        this.copy(in, "OverrideChild.java");
+        this.copy(in, "OverrideParent.java");
 
         // Load our test mappings
         final MappingSet mappings = MappingSet.create();
@@ -56,7 +72,11 @@ class RemappingTests {
         mercury.rewrite(in, out);
 
         // Check that the output is as expected
+        // - Test 1
         this.verify(out, "Core.java");
+        // - Test 2
+        this.verify(out, "OverrideChild.java");
+        this.verify(out, "OverrideParent.java");
 
         // Delete the directory
         Files.walk(tempDir)
