@@ -60,6 +60,13 @@ mercury.getProcessors()
 mercury.rewrite(Paths.get("a"), Paths.get("b"));
 ```
 
+## See Also
+
+There is beginning to be tooling designed to work with Mercury, these may be
+helpful in your project:
+
+- **[CadixDev/MercuryMixin]** which remaps [Mixin]s when remapping.
+
 ## Discuss
 
 **Found an issue with Mercury?** [Make an issue]! We'd rather close invalid
@@ -74,5 +81,7 @@ and discuss Mercury and other Cadix projects.
 [The Fabric Project]: https://fabricmc.net/
 [The Sponge Project]: https://www.spongepowered.org/
 [at]: https://github.com/CadixDev/at
+[CadixDev/MercuryMixin]: https://github.com/CadixDev/MercuryMixin
+[Mixin]: https://github.com/SpongePowered/Mixin
 [Make an issue]: https://github.com/CadixDev/Mercury/issues/new
 [EsperNet]: https://esper.net/
