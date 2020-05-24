@@ -38,7 +38,7 @@ class RemappingTests {
     //      - Mercury can remap simple classes, fields, and methods
     //      - Mercury will remove package declarations when remapping to the
     //        root package (GH-11)
-    // 2. Method overriding and generics
+    // 2. Method overriding and generics (currently disabled)
     //    This test is used to verify that Mercury can handle child classes
     //    overriding methods from their parents:
     //      - Mercury will remap methods with their return type raised (GH-14)
@@ -52,12 +52,12 @@ class RemappingTests {
         Files.createDirectories(in);
         Files.createDirectories(out);
 
-        // Copy our test classes to the virtual file system
+        // Copy our test classes to the temporary directory
         // - Test 1
         this.copy(in, "test/ObfClass.java");
         // - Test 2
-        this.copy(in, "OverrideChild.java");
-        this.copy(in, "OverrideParent.java");
+        //this.copy(in, "OverrideChild.java");
+        //this.copy(in, "OverrideParent.java");
 
         // Load our test mappings
         final MappingSet mappings = MappingSet.create();
@@ -75,8 +75,8 @@ class RemappingTests {
         // - Test 1
         this.verify(out, "Core.java");
         // - Test 2
-        this.verify(out, "OverrideChild.java");
-        this.verify(out, "OverrideParent.java");
+        //this.verify(out, "OverrideChild.java");
+        //this.verify(out, "OverrideParent.java");
 
         // Delete the directory
         Files.walk(tempDir)
