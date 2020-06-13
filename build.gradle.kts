@@ -26,7 +26,7 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
 }
 
-val jdt = "org.eclipse.jdt:org.eclipse.jdt.core:3.19.0"
+val jdt = "org.eclipse.jdt:org.eclipse.jdt.core:3.21.0"
 dependencies {
     api(jdt)
 
