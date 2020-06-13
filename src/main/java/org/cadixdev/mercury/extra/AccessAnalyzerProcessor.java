@@ -24,6 +24,7 @@ import org.cadixdev.lorenz.model.ClassMapping;
 import org.cadixdev.mercury.SourceContext;
 import org.cadixdev.mercury.SourceProcessor;
 import org.cadixdev.mercury.analysis.MercuryInheritanceProvider;
+import org.cadixdev.mercury.util.GracefulCheck;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -69,12 +70,14 @@ public final class AccessAnalyzerProcessor implements SourceProcessor {
 
         private static final AccessTransform TRANSFORM = AccessTransform.of(AccessChange.PUBLIC, ModifierChange.NONE);
 
+        private final SourceContext context;
         private final AccessTransformSet ats;
         private final MappingSet mappings;
         private final InheritanceProvider inheritanceProvider;
         private String newPackage;
 
         private Visitor(SourceContext context, AccessTransformSet ats, MappingSet mappings) {
+            this.context = context;
             this.ats = ats;
             this.mappings = mappings;
             this.inheritanceProvider = MercuryInheritanceProvider.get(context.getMercury());
@@ -111,7 +114,7 @@ public final class AccessAnalyzerProcessor implements SourceProcessor {
 
 
         private boolean needsTransform(SimpleName node, IBinding binding, ITypeBinding declaringClass) {
-            if (declaringClass == null) {
+            if (declaringClass == null || GracefulCheck.checkGracefully(this.context, declaringClass)) {
                 return false;
             }
 

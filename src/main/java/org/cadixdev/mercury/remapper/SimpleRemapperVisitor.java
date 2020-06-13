@@ -19,6 +19,7 @@ import org.cadixdev.lorenz.model.FieldMapping;
 import org.cadixdev.lorenz.model.MethodMapping;
 import org.cadixdev.mercury.RewriteContext;
 import org.cadixdev.mercury.analysis.MercuryInheritanceProvider;
+import org.cadixdev.mercury.util.GracefulCheck;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -49,6 +50,9 @@ class SimpleRemapperVisitor extends ASTVisitor {
 
     private void remapMethod(SimpleName node, IMethodBinding binding) {
         ITypeBinding declaringClass = binding.getDeclaringClass();
+        if (GracefulCheck.checkGracefully(this.context, declaringClass)) {
+            return;
+        }
         ClassMapping<?, ?> classMapping = this.mappings.getOrCreateClassMapping(declaringClass.getBinaryName());
 
         if (binding.isConstructor()) {

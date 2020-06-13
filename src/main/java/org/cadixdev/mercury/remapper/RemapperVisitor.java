@@ -19,6 +19,7 @@ import org.cadixdev.lorenz.model.Mapping;
 import org.cadixdev.lorenz.model.TopLevelClassMapping;
 import org.cadixdev.mercury.RewriteContext;
 import org.cadixdev.mercury.jdt.rewrite.imports.ImportRewrite;
+import org.cadixdev.mercury.util.GracefulCheck;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -81,7 +82,7 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     }
 
     private void remapType(SimpleName node, ITypeBinding binding) {
-        if (binding.isTypeVariable()) {
+        if (binding.isTypeVariable() || GracefulCheck.checkGracefully(this.context, binding)) {
             return;
         }
 
@@ -110,6 +111,9 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     private void remapQualifiedType(QualifiedName node, ITypeBinding binding) {
         String binaryName = binding.getBinaryName();
         if (binaryName == null) {
+            if (this.context.getMercury().isGracefulClasspathChecks()) {
+                return;
+            }
             throw new IllegalStateException("No binary name for " + binding.getQualifiedName());
         }
         TopLevelClassMapping mapping = this.mappings.getTopLevelClassMapping(binaryName).orElse(null);
@@ -128,6 +132,9 @@ class RemapperVisitor extends SimpleRemapperVisitor {
 
     private void remapInnerType(QualifiedName qualifiedName, ITypeBinding outerClass) {
         if (outerClass.getBinaryName() == null) {
+            if (this.context.getMercury().isGracefulClasspathChecks()) {
+                return;
+            }
             throw new IllegalStateException("No binary name for " + outerClass.getQualifiedName());
         }
 
@@ -168,6 +175,9 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     public boolean visit(QualifiedName node) {
         IBinding binding = node.resolveBinding();
         if (binding == null) {
+            if (this.context.getMercury().isGracefulClasspathChecks()) {
+                return false;
+            }
             throw new IllegalStateException("No binding for qualified name node " + node.getFullyQualifiedName());
         }
 
@@ -225,6 +235,9 @@ class RemapperVisitor extends SimpleRemapperVisitor {
                     ITypeBinding typeBinding = (ITypeBinding) binding;
                     String name = typeBinding.getBinaryName();
                     if (name == null) {
+                        if (this.context.getMercury().isGracefulClasspathChecks()) {
+                            return false;
+                        }
                         throw new IllegalStateException("No binary name for " + typeBinding.getQualifiedName() + ". Did you add the library to the classpath?");
                     }
 
@@ -252,6 +265,10 @@ class RemapperVisitor extends SimpleRemapperVisitor {
 
         // Names from inner classes
         for (ITypeBinding inner : binding.getDeclaredTypes()) {
+            if (GracefulCheck.checkGracefully(this.context, inner)) {
+                continue;
+            }
+
             int modifiers = inner.getModifiers();
             if (Modifier.isPrivate(modifiers)) {
                 // Inner type must be declared in this compilation unit

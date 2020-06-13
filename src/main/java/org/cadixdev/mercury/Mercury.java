@@ -41,6 +41,12 @@ public final class Mercury {
 
     private String sourceCompatibility = JavaCore.VERSION_1_8;
     private Charset encoding = StandardCharsets.UTF_8;
+    /**
+     * Mercury will by default crash if a none-complete classpath is supplied, though
+     * you absolutely <em>should</em> supply a full classpath - we can handle it
+     * gracefully.
+     */
+    private boolean gracefulClasspathChecks = false;
 
     private final List<Path> classPath = new ArrayList<>();
     private final List<Path> sourcePath = new ArrayList<>();
@@ -67,6 +73,14 @@ public final class Mercury {
 
     public void setEncoding(Charset encoding) {
         this.encoding = Objects.requireNonNull(encoding, "encoding");
+    }
+
+    public boolean isGracefulClasspathChecks() {
+        return this.gracefulClasspathChecks;
+    }
+
+    public void setGracefulClasspathChecks(final boolean enable) {
+        this.gracefulClasspathChecks = enable;
     }
 
     public List<Path> getClassPath() {
