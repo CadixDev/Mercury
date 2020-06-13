@@ -43,8 +43,9 @@ class RemappingTests {
     //    overriding methods from their parents:
     //      - Mercury will remap methods with their return type raised (GH-14)
     //      - Mercury can handle generic return types, and parameters (GH-8).
-    // 3. Eclipse 511958
-    //    https://bugs.eclipse.org/bugs/show_bug.cgi?id=511958
+    // 3. Eclipse Bugs
+    //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=511958
+    //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=564263
 
     @Test
     void remap() throws Exception {
@@ -62,6 +63,7 @@ class RemappingTests {
         //this.copy(in, "OverrideParent.java");
         // - Test 3
         //this.copy(in, "eclipse/X.java");
+        //this.copy(in, "eclipse/Test.java");
 
         // Load our test mappings
         final MappingSet mappings = MappingSet.create();
@@ -83,6 +85,7 @@ class RemappingTests {
         //this.verify(out, "OverrideParent.java");
         // - Test 3
         //this.verify(in, "eclipse/X.java");
+        //this.verify(in, "eclipse/Test.java");
 
         // Delete the directory
         Files.walk(tempDir)

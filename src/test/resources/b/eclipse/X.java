@@ -12,7 +12,7 @@ package eclipse;
 
 import java.util.function.Consumer;
 
-@SuppressWarnings("all")
+// Eclipse Bug 511958
 public class X {
 
     private final String message = "Bug?";
