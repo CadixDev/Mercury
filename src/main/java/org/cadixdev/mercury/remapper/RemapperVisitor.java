@@ -48,8 +48,8 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     private final ImportRewrite importRewrite;
     private final Deque<ImportContext> importStack = new ArrayDeque<>();
 
-    RemapperVisitor(RewriteContext context, MappingSet mappings) {
-        super(context, mappings);
+    RemapperVisitor(RewriteContext context, MappingSet mappings, boolean javadoc) {
+        super(context, mappings, javadoc);
 
         this.importRewrite = context.createImportRewrite();
         importRewrite.setUseContextToFilterImplicitImports(true);

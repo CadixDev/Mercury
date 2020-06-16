@@ -20,12 +20,8 @@ import org.cadixdev.lorenz.model.MethodMapping;
 import org.cadixdev.mercury.RewriteContext;
 import org.cadixdev.mercury.analysis.MercuryInheritanceProvider;
 import org.cadixdev.mercury.util.GracefulCheck;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 /**
  * Remaps only methods and fields.
@@ -36,7 +32,8 @@ class SimpleRemapperVisitor extends ASTVisitor {
     final MappingSet mappings;
     private final InheritanceProvider inheritanceProvider;
 
-    SimpleRemapperVisitor(RewriteContext context, MappingSet mappings) {
+    SimpleRemapperVisitor(RewriteContext context, MappingSet mappings, boolean javadoc) {
+        super(javadoc);
         this.context = context;
         this.mappings = mappings;
         this.inheritanceProvider = MercuryInheritanceProvider.get(context.getMercury());
@@ -112,4 +109,40 @@ class SimpleRemapperVisitor extends ASTVisitor {
         return false;
     }
 
+    @Override
+    public boolean visit(MemberRef node) {
+        rewrite(node, node.resolveBinding(), MemberRef.QUALIFIER_PROPERTY, MemberRef.NAME_PROPERTY);
+        return true;
+    }
+
+    @Override
+    public boolean visit(MethodRef node) {
+        rewrite(node, node.resolveBinding(), MethodRef.QUALIFIER_PROPERTY, MethodRef.NAME_PROPERTY);
+        return true;
+    }
+
+    private void rewrite(ASTNode node, IBinding binding, ChildPropertyDescriptor qualifierProperty, ChildPropertyDescriptor nameProperty) {
+        if (binding instanceof IMethodBinding) {
+            IMethodBinding method = (IMethodBinding) binding;
+            this.mappings.computeClassMapping(method.getDeclaringClass().getBinaryName())
+                    .flatMap(classMapping -> classMapping.getMethodMapping(convertSignature(method)))
+                    .ifPresent(methodMapping -> {
+                        ASTRewrite rewrite = this.context.createASTRewrite();
+                        rewrite.set(node, qualifierProperty, node.getAST().newName(methodMapping.getParent().getDeobfuscatedName()), null);
+                        rewrite.set(node, nameProperty, node.getAST().newSimpleName(methodMapping.getDeobfuscatedName()), null);
+                    });
+        } else if (binding instanceof IVariableBinding) {
+            IVariableBinding field = (IVariableBinding) binding;
+
+            if (field.isField()) {
+                this.mappings.computeClassMapping(field.getDeclaringClass().getBinaryName())
+                        .flatMap(classMapping -> classMapping.getFieldMapping(convertSignature(field)))
+                        .ifPresent(fieldMapping -> {
+                            ASTRewrite rewrite = this.context.createASTRewrite();
+                            rewrite.set(node, qualifierProperty, node.getAST().newName(fieldMapping.getParent().getDeobfuscatedName()), null);
+                            rewrite.set(node, nameProperty, node.getAST().newSimpleName(fieldMapping.getDeobfuscatedName()), null);
+                        });
+            }
+        }
+    }
 }
