@@ -10,6 +10,9 @@
 
 package org.cadixdev.mercury.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.cadixdev.bombe.util.ByteStreams;
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.lorenz.io.MappingFormats;
@@ -27,9 +30,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class RemappingTests {
 
     // Mercury contains the following tests:
@@ -38,14 +38,15 @@ class RemappingTests {
     //      - Mercury can remap simple classes, fields, and methods
     //      - Mercury will remove package declarations when remapping to the
     //        root package (GH-11)
-    // 2. Method overriding and generics (currently disabled)
+    //      - Mercury will remap Javadoc references (GH-6)
+    // 2. Method overriding and generics
     //    This test is used to verify that Mercury can handle child classes
     //    overriding methods from their parents:
-    //      - Mercury will remap methods with their return type raised (GH-14)
-    //      - Mercury can handle generic return types, and parameters (GH-8).
+    //      - Mercury will remap methods with their return type raised (GH-14) (currently disabled)
+    //      - Mercury can handle generic return types, and parameters (GH-8) (currently disabled)
     // 3. Eclipse Bugs
-    //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=511958
-    //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=564263
+    //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=511958 (currently disabled)
+    //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=564263 (currently disabled)
 
     @Test
     void remap() throws Exception {
@@ -58,6 +59,7 @@ class RemappingTests {
         // Copy our test classes to the temporary directory
         // - Test 1
         this.copy(in, "test/ObfClass.java");
+        this.copy(in, "JavadocTest.java");
         // - Test 2
         //this.copy(in, "OverrideChild.java");
         //this.copy(in, "OverrideParent.java");
@@ -80,12 +82,13 @@ class RemappingTests {
         // Check that the output is as expected
         // - Test 1
         this.verify(out, "Core.java");
+        this.verify(out, "JavadocTest.java");
         // - Test 2
         //this.verify(out, "OverrideChild.java");
         //this.verify(out, "OverrideParent.java");
         // - Test 3
-        //this.verify(in, "eclipse/X.java");
-        //this.verify(in, "eclipse/Test.java");
+        //this.verify(out, "eclipse/X.java");
+        //this.verify(out, "eclipse/Test.java");
 
         // Delete the directory
         Files.walk(tempDir)

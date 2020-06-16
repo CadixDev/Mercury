@@ -19,19 +19,29 @@ import java.util.Objects;
 public final class MercuryRemapper implements SourceRewriter {
 
     public static SourceRewriter create(MappingSet mappings) {
-        return new MercuryRemapper(mappings, false);
+        return new MercuryRemapper(mappings, false, true);
+    }
+
+    public static SourceRewriter create(MappingSet mappings, boolean javadoc) {
+        return new MercuryRemapper(mappings, false, javadoc);
     }
 
     public static SourceRewriter createSimple(MappingSet mappings) {
-        return new MercuryRemapper(mappings, true);
+        return new MercuryRemapper(mappings, true, true);
+    }
+
+    public static SourceRewriter createSimple(MappingSet mappings, boolean javadoc) {
+        return new MercuryRemapper(mappings, true, javadoc);
     }
 
     private final MappingSet mappings;
     private final boolean simple;
+    private final boolean javadoc;
 
-    private MercuryRemapper(MappingSet mappings, boolean simple) {
+    private MercuryRemapper(MappingSet mappings, boolean simple, boolean javadoc) {
         this.mappings = Objects.requireNonNull(mappings, "mappings");
         this.simple = simple;
+        this.javadoc = javadoc;
     }
 
     @Override
@@ -41,8 +51,9 @@ public final class MercuryRemapper implements SourceRewriter {
 
     @Override
     public void rewrite(RewriteContext context) {
-        context.getCompilationUnit().accept(
-                this.simple ? new SimpleRemapperVisitor(context, this.mappings) : new RemapperVisitor(context, this.mappings));
+        context.getCompilationUnit().accept(this.simple ?
+                new SimpleRemapperVisitor(context, this.mappings, this.javadoc) :
+                new RemapperVisitor(context, this.mappings, this.javadoc));
     }
 
 }

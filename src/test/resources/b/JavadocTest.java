@@ -8,14 +8,21 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
+class JavadocTest {
 
+    /**
+     * The {@link Core core}.
+     */
+    private final Core core = new Core();
 
-public class Core {
-
-    private static final String firstName = "Bob";
-
-    public static String firstName() {
-        return firstName;
+    /**
+     * Gets the name of the core.
+     *
+     * @return The name
+     * @see Core#firstName()
+     */
+    public String getName() {
+        return this.core.firstName();
     }
 
 }

@@ -8,14 +8,23 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
+import test.ObfClass;
 
+class JavadocTest {
 
-public class Core {
+    /**
+     * The {@link ObfClass core}.
+     */
+    private final ObfClass core = new ObfClass();
 
-    private static final String firstName = "Bob";
-
-    public static String firstName() {
-        return firstName;
+    /**
+     * Gets the name of the core.
+     *
+     * @return The name
+     * @see ObfClass#name()
+     */
+    public String getName() {
+        return this.core.name();
     }
 
 }

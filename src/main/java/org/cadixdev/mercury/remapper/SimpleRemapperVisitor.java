@@ -36,7 +36,8 @@ class SimpleRemapperVisitor extends ASTVisitor {
     final MappingSet mappings;
     private final InheritanceProvider inheritanceProvider;
 
-    SimpleRemapperVisitor(RewriteContext context, MappingSet mappings) {
+    SimpleRemapperVisitor(RewriteContext context, MappingSet mappings, boolean javadoc) {
+        super(javadoc);
         this.context = context;
         this.mappings = mappings;
         this.inheritanceProvider = MercuryInheritanceProvider.get(context.getMercury());
