@@ -74,7 +74,7 @@ class RemappingTests {
 
         // Run Mercury
         final Mercury mercury = new Mercury();
-        mercury.getProcessors().add(MercuryRemapper.create(mappings));
+        mercury.getProcessors().add(MercuryRemapper.create(mappings, true));
         mercury.rewrite(in, out);
 
         // Check that the output is as expected
