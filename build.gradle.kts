@@ -32,7 +32,7 @@ dependencies {
 
     // TODO: Split in separate modules
     api("org.cadixdev:at:0.1.0-SNAPSHOT")
-    api("org.cadixdev:lorenz:0.5.2")
+    api("org.cadixdev:lorenz:0.6.0-SNAPSHOT")
 
     "jdt"("$jdt:sources")
 
