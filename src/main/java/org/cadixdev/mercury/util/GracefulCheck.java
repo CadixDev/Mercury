@@ -11,7 +11,9 @@
 package org.cadixdev.mercury.util;
 
 import org.cadixdev.mercury.SourceContext;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 
 /**
  * Utility for checking gracefully, based on configuration.
@@ -22,6 +24,16 @@ public final class GracefulCheck {
 
     public static boolean checkGracefully(final SourceContext ctx, final ITypeBinding binding) {
         return ctx.getMercury().isGracefulClasspathChecks() && binding.getBinaryName() == null;
+    }
+
+    public static boolean isJavadoc(ASTNode node) {
+        for (ASTNode current = node; current != null; current = current.getParent()) {
+            if (current instanceof Javadoc) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private GracefulCheck() {

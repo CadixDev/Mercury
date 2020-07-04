@@ -47,6 +47,11 @@ public final class Mercury {
      * gracefully.
      */
     private boolean gracefulClasspathChecks = false;
+    /**
+     * See {@link #gracefulClasspathChecks}. This is just for Javadoc as they can be
+     * broken, but we want to ignore
+     */
+    private boolean gracefulJavadocClasspathChecks = false;
 
     private final List<Path> classPath = new ArrayList<>();
     private final List<Path> sourcePath = new ArrayList<>();
@@ -81,6 +86,14 @@ public final class Mercury {
 
     public void setGracefulClasspathChecks(final boolean enable) {
         this.gracefulClasspathChecks = enable;
+    }
+
+    public boolean isGracefulJavadocClasspathChecks() {
+        return gracefulJavadocClasspathChecks;
+    }
+
+    public void setGracefulJavadocClasspathChecks(boolean enable) {
+        this.gracefulJavadocClasspathChecks = enable;
     }
 
     public List<Path> getClassPath() {
