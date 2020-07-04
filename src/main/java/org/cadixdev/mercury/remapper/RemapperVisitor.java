@@ -118,7 +118,7 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     private void remapQualifiedType(QualifiedName node, ITypeBinding binding) {
         String binaryName = binding.getBinaryName();
         if (binaryName == null) {
-            if (this.context.getMercury().isGracefulClasspathChecks()) {
+            if (this.context.getMercury().isGracefulClasspathChecks() || this.context.getMercury().isGracefulJavadocClasspathChecks() && GracefulCheck.isJavadoc(node)) {
                 return;
             }
             throw new IllegalStateException("No binary name for " + binding.getQualifiedName());
