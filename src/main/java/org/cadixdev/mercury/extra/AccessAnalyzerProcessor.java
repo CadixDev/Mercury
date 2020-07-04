@@ -127,6 +127,10 @@ public final class AccessAnalyzerProcessor implements SourceProcessor {
                 return false;
             }
 
+            if (declaringClass.getBinaryName() == null) {
+                throw new IllegalStateException("Binary name for binding " + declaringClass.getQualifiedName() + " is null. Did you forget to add a library to the classpath?");
+            }
+
             ClassMapping<?, ?> mapping = this.mappings.getClassMapping(declaringClass.getBinaryName()).orElse(null);
 
             String packageName;

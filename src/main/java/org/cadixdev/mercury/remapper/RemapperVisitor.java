@@ -86,6 +86,10 @@ class RemapperVisitor extends SimpleRemapperVisitor {
             return;
         }
 
+        if (binding.getBinaryName() == null) {
+            throw new IllegalStateException("Binary name for binding " + binding.getQualifiedName() + " is null. Did you forget to add a library to the classpath?");
+        }
+
         ClassMapping<?, ?> mapping = this.mappings.computeClassMapping(binding.getBinaryName()).orElse(null);
 
         if (node.getParent() instanceof AbstractTypeDeclaration || binding.isLocal()) {
