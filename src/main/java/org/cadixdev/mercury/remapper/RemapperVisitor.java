@@ -135,14 +135,15 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     }
 
     private void remapInnerType(QualifiedName qualifiedName, ITypeBinding outerClass) {
-        if (outerClass.getBinaryName() == null) {
+        final String binaryName = outerClass.getBinaryName();
+        if (binaryName == null) {
             if (this.context.getMercury().isGracefulClasspathChecks()) {
                 return;
             }
             throw new IllegalStateException("No binary name for " + outerClass.getQualifiedName());
         }
 
-        ClassMapping<?, ?> outerClassMapping = this.mappings.computeClassMapping(outerClass.getBinaryName()).orElse(null);
+        ClassMapping<?, ?> outerClassMapping = this.mappings.computeClassMapping(binaryName).orElse(null);
         if (outerClassMapping == null) {
             return;
         }
