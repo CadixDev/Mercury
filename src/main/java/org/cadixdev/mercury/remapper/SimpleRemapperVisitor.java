@@ -111,24 +111,18 @@ class SimpleRemapperVisitor extends ASTVisitor {
 
         int index = -1;
 
-        for (ASTNode n = node; n != null; n = n.getParent()) {
-            if (n instanceof MethodDeclaration) {
-                MethodDeclaration methodDeclaration = (MethodDeclaration) n;
+        ASTNode n = context.getCompilationUnit().findDeclaringNode(declaringMethod);
 
-                if (!declaringMethod.equals(methodDeclaration.resolveBinding())) {
-                    break;
+        if (n instanceof MethodDeclaration) {
+            MethodDeclaration methodDeclaration = (MethodDeclaration) n;
+
+            // noinspection unchecked
+            List<SingleVariableDeclaration> parameters = methodDeclaration.parameters();
+
+            for (int i = 0; i < parameters.size(); i++) {
+                if (binding.equals(parameters.get(i).resolveBinding())) {
+                    index = i;
                 }
-
-                // noinspection unchecked
-                List<SingleVariableDeclaration> parameters = methodDeclaration.parameters();
-
-                for (int i = 0; i < parameters.size(); i++) {
-                    if (binding.equals(parameters.get(i).resolveBinding())) {
-                        index = i;
-                    }
-                }
-
-                break;
             }
         }
 
