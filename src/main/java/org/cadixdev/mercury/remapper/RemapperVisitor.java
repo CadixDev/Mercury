@@ -47,6 +47,7 @@ class RemapperVisitor extends SimpleRemapperVisitor {
 
     private final ImportRewrite importRewrite;
     private final Deque<ImportContext> importStack = new ArrayDeque<>();
+    private final String simpleDeobfuscatedName;
 
     RemapperVisitor(RewriteContext context, MappingSet mappings, boolean javadoc) {
         super(context, mappings, javadoc);
@@ -59,7 +60,7 @@ class RemapperVisitor extends SimpleRemapperVisitor {
             context.setPackageName(primary.getDeobfuscatedPackage().replace('/', '.'));
             this.importRewrite.setImplicitPackageName(context.getPackageName());
 
-            String simpleDeobfuscatedName = primary.getSimpleDeobfuscatedName();
+            this.simpleDeobfuscatedName = primary.getSimpleDeobfuscatedName();
             context.setPrimaryType(simpleDeobfuscatedName);
 
             List<String> implicitTypes = new ArrayList<>();
@@ -78,6 +79,8 @@ class RemapperVisitor extends SimpleRemapperVisitor {
                 }
             }
             this.importRewrite.setImplicitTypes(implicitTypes);
+        } else {
+            this.simpleDeobfuscatedName = null;
         }
     }
 
@@ -248,6 +251,8 @@ class RemapperVisitor extends SimpleRemapperVisitor {
 
                     ClassMapping<?, ?> mapping = this.mappings.computeClassMapping(name).orElse(null);
                     if (mapping != null && !name.equals(mapping.getFullDeobfuscatedName().replace('/', '.'))) {
+                        this.importRewrite.removeImport(typeBinding.getQualifiedName());
+                    } else if (this.simpleDeobfuscatedName != null && this.simpleDeobfuscatedName.equals(typeBinding.getName())) {
                         this.importRewrite.removeImport(typeBinding.getQualifiedName());
                     }
 
