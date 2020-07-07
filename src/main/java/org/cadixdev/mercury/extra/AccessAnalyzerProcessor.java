@@ -127,7 +127,12 @@ public final class AccessAnalyzerProcessor implements SourceProcessor {
                 return false;
             }
 
-            ClassMapping<?, ?> mapping = this.mappings.getClassMapping(declaringClass.getBinaryName()).orElse(null);
+            final String binaryName = declaringClass.getBinaryName();
+            if (binaryName == null) {
+                throw new IllegalStateException("Binary name for binding " + declaringClass.getQualifiedName() + " is null. Did you forget to add a library to the classpath?");
+            }
+
+            ClassMapping<?, ?> mapping = this.mappings.getClassMapping(binaryName).orElse(null);
 
             String packageName;
             if (mapping != null) {
@@ -141,6 +146,11 @@ public final class AccessAnalyzerProcessor implements SourceProcessor {
         }
 
         private void analyze(SimpleName node, ITypeBinding binding) {
+            if (binding.isLocal()) {
+                // It's illegal to make local classes public
+                // They can't be used outside the source file anyways
+                return;
+            }
             if (needsTransform(node, binding, binding)) {
                 this.ats.getOrCreateClass(binding.getBinaryName()).merge(TRANSFORM);
             }
