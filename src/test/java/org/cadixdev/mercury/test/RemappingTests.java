@@ -61,16 +61,18 @@ class RemappingTests {
         this.copy(in, "test/ObfClass.java");
         this.copy(in, "JavadocTest.java");
         // - Test 2
+        this.copy(in, "ParameterTest.java");
+        // - Test 3
         //this.copy(in, "OverrideChild.java");
         //this.copy(in, "OverrideParent.java");
-        // - Test 3
+        // - Test 4
         //this.copy(in, "eclipse/X.java");
         //this.copy(in, "eclipse/Test.java");
 
         // Load our test mappings
         final MappingSet mappings = MappingSet.create();
-        try (final MappingsReader reader = MappingFormats.TSRG
-                .createReader(RemappingTests.class.getResourceAsStream("/test.tsrg"))) {
+        try (final MappingsReader reader = MappingFormats.byId("jam")
+                .createReader(RemappingTests.class.getResourceAsStream("/test.jam"))) {
             reader.read(mappings);
         }
 
@@ -84,9 +86,11 @@ class RemappingTests {
         this.verify(out, "Core.java");
         this.verify(out, "JavadocTest.java");
         // - Test 2
+        this.verify(out, "ParameterTest.java");
+        // - Test 3
         //this.verify(out, "OverrideChild.java");
         //this.verify(out, "OverrideParent.java");
-        // - Test 3
+        // - Test 4
         //this.verify(out, "eclipse/X.java");
         //this.verify(out, "eclipse/Test.java");
 
