@@ -39,12 +39,17 @@ class RemappingTests {
     //      - Mercury will remove package declarations when remapping to the
     //        root package (GH-11)
     //      - Mercury will remap Javadoc references (GH-6)
-    // 2. Method overriding and generics
+    // 2. Parameter remaps
+    //    This test is used to verify that Mercury can remap parameter names:
+    //      - In source code
+    //      - In Javadoc references
+    //      - Within lambda expressions and anonymous classes
+    // 3. Method overriding and generics
     //    This test is used to verify that Mercury can handle child classes
     //    overriding methods from their parents:
     //      - Mercury will remap methods with their return type raised (GH-14) (currently disabled)
     //      - Mercury can handle generic return types, and parameters (GH-8) (currently disabled)
-    // 3. Eclipse Bugs
+    // 4. Eclipse Bugs
     //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=511958 (currently disabled)
     //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=564263 (currently disabled)
 
