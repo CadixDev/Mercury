@@ -36,3 +36,9 @@ FD anon/Test$2 field I abc
 MD anon/Test$1 name (II)V remapped
 MD anon/Test$2 name (DD)V remapped
 MD anon/Test$3 name (ZZ)V remapped
+
+# Test 6. Import tests
+CL com/example/pkg/Constants net/example/pkg/Util
+CL com/example/ImportTest net/example/ImportTestNew
+CL com/example/other/OtherClass net/example/newother/OtherClass
+CL com/example/other/AnotherClass net/example/newother/AnotherClass

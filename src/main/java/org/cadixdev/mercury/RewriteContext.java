@@ -96,7 +96,12 @@ public final class RewriteContext extends SourceContext {
             return edit;
         }
         if (edit != null) {
-            before.addChild(edit);
+            if (edit instanceof MultiTextEdit) {
+                MultiTextEdit multiTextEdit = (MultiTextEdit) edit;
+                before.addChildren(multiTextEdit.removeChildren());
+            } else {
+                before.addChild(edit);
+            }
         }
         return before;
     }

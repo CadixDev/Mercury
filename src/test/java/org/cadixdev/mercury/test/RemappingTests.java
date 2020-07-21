@@ -55,6 +55,7 @@ class RemappingTests {
     // 5. Anonymous class remapping
     //    This test verifies we can handle remapping cases for different anonymous class remapping
     //    combinations (GH-31).
+    // 6. Import remapping tests (GH-28)
 
     @Test
     void remap() throws Exception {
@@ -81,6 +82,11 @@ class RemappingTests {
         //this.copy(in, "eclipse/Test.java");
         // - Test 5
         this.copy(in, "anon/Test.java");
+        // - Test 6
+        this.copy(in, "com/example/ImportTest.java");
+        this.copy(in, "com/example/other/AnotherClass.java");
+        this.copy(in, "com/example/other/OtherClass.java");
+        this.copy(in, "com/example/pkg/Constants.java");
 
         // Load our test mappings
         final MappingSet mappings = MappingSet.create();
@@ -110,6 +116,11 @@ class RemappingTests {
         //this.verify(out, "eclipse/Test.java");
         // - Test 5
         this.verify(out, "anon/Anon.java");
+        // - Test 6
+        this.verify(out, "net/example/ImportTestNew.java");
+        this.verify(out, "net/example/newother/AnotherClass.java");
+        this.verify(out, "net/example/newother/OtherClass.java");
+        this.verify(out, "net/example/pkg/Util.java");
 
         // Delete the directory
         Files.walk(tempDir)
