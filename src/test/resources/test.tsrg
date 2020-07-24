@@ -14,3 +14,9 @@ eclipse/X eclipse/X
 	text message
 eclipse/Test eclipse/Test
 	text message
+
+# Test 4. Import tests
+com/example/pkg/Constants net/example/pkg/Util
+com/example/ImportTest net/example/ImportTestNew
+com/example/other/OtherClass net/example/newother/OtherClass
+com/example/other/AnotherClass net/example/newother/AnotherClass

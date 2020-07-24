@@ -47,6 +47,7 @@ class RemappingTests {
     // 3. Eclipse Bugs
     //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=511958 (currently disabled)
     //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=564263 (currently disabled)
+    // 4. Import remapping tests (GH-28)
 
     @Test
     void remap() throws Exception {
@@ -66,6 +67,11 @@ class RemappingTests {
         // - Test 3
         //this.copy(in, "eclipse/X.java");
         //this.copy(in, "eclipse/Test.java");
+        // - Test 4
+        this.copy(in, "com/example/ImportTest.java");
+        this.copy(in, "com/example/other/AnotherClass.java");
+        this.copy(in, "com/example/other/OtherClass.java");
+        this.copy(in, "com/example/pkg/Constants.java");
 
         // Load our test mappings
         final MappingSet mappings = MappingSet.create();
@@ -89,6 +95,11 @@ class RemappingTests {
         // - Test 3
         //this.verify(out, "eclipse/X.java");
         //this.verify(out, "eclipse/Test.java");
+        // - Test 4
+        this.verify(out, "net/example/ImportTestNew.java");
+        this.verify(out, "net/example/newother/AnotherClass.java");
+        this.verify(out, "net/example/newother/OtherClass.java");
+        this.verify(out, "net/example/pkg/Util.java");
 
         // Delete the directory
         Files.walk(tempDir)
