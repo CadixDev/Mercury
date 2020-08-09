@@ -115,7 +115,7 @@ public final class AccessTransformerRewriter implements SourceRewriter {
                         switch (finalChange) {
                             case REMOVE:
                                 this.context.createASTRewrite().remove(m, null);
-                                continue;
+                                // fallthrough
                             case ADD:
                                 finalChange = ModifierChange.NONE;
                                 continue;
