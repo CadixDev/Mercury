@@ -14,3 +14,13 @@ eclipse/X eclipse/X
 	text message
 eclipse/Test eclipse/Test
 	text message
+
+# Test 4. Anonymous class remap
+anon/Test anon/Anon
+anon/Test$1 anon/Anon$3
+	name (II)V remapped
+anon/Test$2 anon/Anon$1
+	name (DD)V remapped
+	field abc
+anon/Test$3 anon/Anon$2
+	name (ZZ)V remapped

@@ -47,6 +47,9 @@ class RemappingTests {
     // 3. Eclipse Bugs
     //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=511958 (currently disabled)
     //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=564263 (currently disabled)
+    // 4. Anonymous class remapping
+    //    This test verifies we can handle remapping cases for different anonymous class remapping
+    //    combinations (GH-31).
 
     @Test
     void remap() throws Exception {
@@ -66,6 +69,8 @@ class RemappingTests {
         // - Test 3
         //this.copy(in, "eclipse/X.java");
         //this.copy(in, "eclipse/Test.java");
+        // - Test 4
+        this.copy(in, "anon/Test.java");
 
         // Load our test mappings
         final MappingSet mappings = MappingSet.create();
@@ -89,6 +94,8 @@ class RemappingTests {
         // - Test 3
         //this.verify(out, "eclipse/X.java");
         //this.verify(out, "eclipse/Test.java");
+        // - Test 4
+        this.verify(out, "anon/Anon.java");
 
         // Delete the directory
         Files.walk(tempDir)
