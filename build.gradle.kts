@@ -86,6 +86,10 @@ renameTask.inputs.files(tasks["applyPatches"])
 tasks["makePatches"].inputs.files(createRenameTask("un", jdtSrcDir, patches.target, renames.map { (a,b) -> b to a }))
 sourceSets["main"].java.srcDirs(renameTask)
 
+tasks.jar.configure {
+    manifest.attributes(mapOf("Automatic-Module-Name" to "${project.group}.$artifactId"))
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
