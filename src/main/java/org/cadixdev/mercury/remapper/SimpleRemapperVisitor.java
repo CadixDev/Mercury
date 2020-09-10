@@ -10,12 +10,17 @@
 
 package org.cadixdev.mercury.remapper;
 
-import static org.cadixdev.mercury.util.BombeBindings.convertSignature;
-
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import org.cadixdev.bombe.analysis.InheritanceProvider;
+import org.cadixdev.bombe.type.signature.FieldSignature;
+import org.cadixdev.bombe.type.signature.MethodSignature;
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.lorenz.model.ClassMapping;
 import org.cadixdev.lorenz.model.FieldMapping;
+import org.cadixdev.lorenz.model.InnerClassMapping;
+import org.cadixdev.lorenz.model.MemberMapping;
 import org.cadixdev.lorenz.model.MethodMapping;
 import org.cadixdev.mercury.RewriteContext;
 import org.cadixdev.mercury.analysis.MercuryInheritanceProvider;
@@ -26,6 +31,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
+
+import static org.cadixdev.mercury.util.BombeBindings.convertSignature;
 
 /**
  * Remaps only methods and fields.
@@ -54,14 +61,19 @@ class SimpleRemapperVisitor extends ASTVisitor {
         if (GracefulCheck.checkGracefully(this.context, declaringClass)) {
             return;
         }
-        ClassMapping<?, ?> classMapping = this.mappings.getOrCreateClassMapping(declaringClass.getBinaryName());
+        final ClassMapping<?, ?> classMapping = this.mappings.getOrCreateClassMapping(declaringClass.getBinaryName());
 
         if (binding.isConstructor()) {
             updateIdentifier(node, classMapping.getSimpleDeobfuscatedName());
         } else {
-            classMapping.complete(this.inheritanceProvider, declaringClass);
+            MethodSignature bindingSignature = convertSignature(binding);
+            MethodMapping mapping = findMemberMapping(bindingSignature, classMapping, ClassMapping::getMethodMapping);
 
-            MethodMapping mapping = classMapping.getMethodMapping(convertSignature(binding)).orElse(null);
+            if (mapping == null) {
+                classMapping.complete(this.inheritanceProvider, declaringClass);
+                mapping = classMapping.getMethodMapping(bindingSignature).orElse(null);
+            }
+
             if (mapping == null) {
                 return;
             }
@@ -85,12 +97,72 @@ class SimpleRemapperVisitor extends ASTVisitor {
             return;
         }
 
-        FieldMapping mapping = classMapping.computeFieldMapping(convertSignature(binding)).orElse(null);
+        FieldSignature bindingSignature = convertSignature(binding);
+        FieldMapping mapping = findMemberMapping(bindingSignature, classMapping, ClassMapping::computeFieldMapping);
         if (mapping == null) {
             return;
         }
 
         updateIdentifier(node, mapping.getDeobfuscatedName());
+    }
+
+    private <T extends MemberMapping<?, ?>, M> T findMemberMapping(
+        M matcher,
+        ClassMapping<?, ?> classMapping,
+        BiFunction<ClassMapping<?, ?>, M, Optional<? extends T>> getMapping
+    ) {
+        T mapping = getMapping.apply(classMapping, matcher).orElse(null);
+        if (mapping != null) {
+            return mapping;
+        }
+
+        return findMemberMappingAnonClass(matcher, classMapping, getMapping);
+    }
+
+    private <T extends MemberMapping<?, ?>, M> T findMemberMappingAnonClass(
+        M matcher,
+        ClassMapping<?, ?> classMapping,
+        BiFunction<ClassMapping<?, ?>, M, Optional<? extends T>> getMapping
+    ) {
+        // If neither name is different then this method won't do anything
+        if (Objects.equals(classMapping.getObfuscatedName(), classMapping.getDeobfuscatedName())) {
+            return null;
+        }
+        // Anonymous classes must be inner classes
+        if (!(classMapping instanceof InnerClassMapping)) {
+            return null;
+        }
+        // Verify this is inner class is anonymous
+        if (!classMapping.getObfuscatedName().chars().allMatch(Character::isDigit)) {
+            return null;
+        }
+        ClassMapping<?, ?> parentMapping = ((InnerClassMapping) classMapping).getParent();
+        if (parentMapping == null) {
+            return null;
+        }
+
+        // Find a sibling anonymous class whose obfuscated name is our deobfuscated name
+        ClassMapping<?, ?> otherClassMapping = parentMapping
+            .getInnerClassMapping(classMapping.getDeobfuscatedName()).orElse(null);
+        if (otherClassMapping != null) {
+            T mapping = getMapping.apply(otherClassMapping, matcher).orElse(null);
+            if (mapping != null) {
+                return mapping;
+            }
+        }
+
+        // Find a sibling anonymous class whose deobfuscated name is our obfuscated name
+        // We have to do something a little less direct for this case
+        for (InnerClassMapping innerClassMapping : parentMapping.getInnerClassMappings()) {
+            if (Objects.equals(classMapping.getObfuscatedName(), innerClassMapping.getDeobfuscatedName())) {
+                otherClassMapping = innerClassMapping;
+                break;
+            }
+        }
+        if (otherClassMapping == null) {
+            return null;
+        }
+        return getMapping.apply(otherClassMapping, matcher).orElse(null);
     }
 
     protected void visit(SimpleName node, IBinding binding) {
