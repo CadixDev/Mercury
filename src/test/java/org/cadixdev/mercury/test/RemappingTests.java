@@ -62,7 +62,9 @@ class RemappingTests {
         // Copy our test classes to the temporary directory
         // - Test 1
         this.copy(in, "test/ObfClass.java");
+        this.copy(in, "NonNull.java");
         this.copy(in, "JavadocTest.java");
+        this.copy(in, "NameQualifiedTest.java");
         // - Test 2
         //this.copy(in, "OverrideChild.java");
         //this.copy(in, "OverrideParent.java");
@@ -88,6 +90,7 @@ class RemappingTests {
         // - Test 1
         this.verify(out, "Core.java");
         this.verify(out, "JavadocTest.java");
+        this.verify(out, "NameQualifiedTest.java");
         // - Test 2
         //this.verify(out, "OverrideChild.java");
         //this.verify(out, "OverrideParent.java");

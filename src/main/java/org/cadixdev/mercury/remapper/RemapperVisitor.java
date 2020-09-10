@@ -20,7 +20,10 @@ import org.cadixdev.lorenz.model.TopLevelClassMapping;
 import org.cadixdev.mercury.RewriteContext;
 import org.cadixdev.mercury.jdt.rewrite.imports.ImportRewrite;
 import org.cadixdev.mercury.util.GracefulCheck;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
@@ -29,10 +32,15 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -95,7 +103,10 @@ class RemapperVisitor extends SimpleRemapperVisitor {
 
         ClassMapping<?, ?> mapping = this.mappings.computeClassMapping(binding.getBinaryName()).orElse(null);
 
-        if (node.getParent() instanceof AbstractTypeDeclaration || binding.isLocal()) {
+        if (node.getParent() instanceof AbstractTypeDeclaration
+                || node.getParent() instanceof QualifiedType
+                || node.getParent() instanceof NameQualifiedType
+                || binding.isLocal()) {
             if (mapping != null) {
                 updateIdentifier(node, mapping.getSimpleDeobfuscatedName());
             }
@@ -214,6 +225,52 @@ class RemapperVisitor extends SimpleRemapperVisitor {
 
         return false;
     }
+
+    @Override
+    public boolean visit(NameQualifiedType node) {
+        // Annotated inner class -> com.package.Outer.@NonNull Inner
+        // existing mechanisms will handle
+        final IBinding qualBinding = node.getQualifier().resolveBinding();
+        if (qualBinding != null && qualBinding.getKind() == IBinding.TYPE) {
+            return true;
+        }
+
+        ITypeBinding binding = node.getName().resolveTypeBinding();
+        if (binding == null) {
+            if (this.context.getMercury().isGracefulClasspathChecks()) {
+                return false;
+            }
+            throw new IllegalStateException("No binding for qualified name node " + node.getName());
+        }
+
+        final ClassMapping<?, ?> classMapping = this.mappings.computeClassMapping(binding.getBinaryName()).orElse(null);
+        if (classMapping == null) {
+            return false;
+        }
+
+        // qualified -> default package (test.@NonNull ObfClass -> @NonNull Core):
+        final String deobfPackage = classMapping.getDeobfuscatedPackage();
+        final ASTRewrite rewrite = this.context.createASTRewrite();
+        if (deobfPackage == null || deobfPackage.isEmpty()) {
+            // if we have annotations, those need to be moved to a new SimpleType node
+            final ASTNode nameNode;
+            if (node.isAnnotatable() && !node.annotations().isEmpty()) {
+                final SimpleType type = node.getName().getAST().newSimpleType((Name) rewrite.createCopyTarget(node.getName()));
+                transferAnnotations(node, type);
+                nameNode = type;
+            } else {
+                nameNode = node.getName();
+            }
+            rewrite.replace(node, nameNode, null);
+        } else {
+            // qualified -> other qualified:
+            rewrite.set(node, NameQualifiedType.QUALIFIER_PROPERTY, node.getAST().newName(deobfPackage.replace('/', '.')), null);
+        }
+        node.getName().accept(this);
+
+        return false;
+    }
+
 
     @Override
     public boolean visit(PackageDeclaration node) {
@@ -365,6 +422,25 @@ class RemapperVisitor extends SimpleRemapperVisitor {
     @Override
     public void endVisit(TypeDeclaration node) {
         this.importStack.pop();
+    }
+
+    private void transferAnnotations(final AnnotatableType oldNode, final AnnotatableType newNode) {
+        // we don't support type annotations, ignore
+        if (newNode.getAST().apiLevel() < AST.JLS8) {
+            return;
+        }
+        if (oldNode.annotations().isEmpty()) {
+            // none to transfer
+            return;
+        }
+
+        // transfer and visit
+        final ListRewrite rewrite = this.context.createASTRewrite().getListRewrite(newNode, newNode.getAnnotationsProperty());
+        for (Object annotation : oldNode.annotations()) {
+            final ASTNode annotationNode = (ASTNode) annotation;
+            annotationNode.accept(this);
+            rewrite.insertLast(annotationNode, null);
+        }
     }
 
     private static class ImportContext extends ImportRewrite.ImportRewriteContext {
