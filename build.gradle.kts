@@ -23,7 +23,6 @@ configurations {
 
 repositories {
     mavenCentral()
-    maven("https://oss.sonatype.org/content/repositories/snapshots/")
 }
 
 val jdt = "org.eclipse.jdt:org.eclipse.jdt.core:3.21.0"
@@ -31,7 +30,7 @@ dependencies {
     api(jdt)
 
     // TODO: Split in separate modules
-    api("org.cadixdev:at:0.1.0-SNAPSHOT")
+    api("org.cadixdev:at:0.1.0-rc1")
     api("org.cadixdev:lorenz:0.5.2")
 
     "jdt"("$jdt:sources")
@@ -126,7 +125,11 @@ publishing {
             artifact(javadocJar)
 
             pom {
+                val name: String by project
+                val description: String by project
                 val url: String by project
+                name(name)
+                description(description)
                 url(url)
 
                 scm {
@@ -145,6 +148,16 @@ publishing {
                         name("Eclipse Public License, Version 2.0")
                         url("https://www.eclipse.org/legal/epl-2.0/")
                         distribution("repo")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id("jamierocks")
+                        name("Jamie Mansfield")
+                        email("jmansfield@cadixdev.org")
+                        url("https://www.jamiemansfield.me/")
+                        timezone("Europe/London")
                     }
                 }
             }
