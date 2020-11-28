@@ -47,7 +47,10 @@ class RemappingTests {
     // 3. Eclipse Bugs
     //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=511958 (currently disabled)
     //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=564263 (currently disabled)
-    // 4. Import remapping tests (GH-28)
+    // 4. Anonymous class remapping
+    //    This test verifies we can handle remapping cases for different anonymous class remapping
+    //    combinations (GH-31).
+    // 5. Import remapping tests (GH-28)
 
     @Test
     void remap() throws Exception {
@@ -60,7 +63,9 @@ class RemappingTests {
         // Copy our test classes to the temporary directory
         // - Test 1
         this.copy(in, "test/ObfClass.java");
+        this.copy(in, "NonNull.java");
         this.copy(in, "JavadocTest.java");
+        this.copy(in, "NameQualifiedTest.java");
         // - Test 2
         //this.copy(in, "OverrideChild.java");
         //this.copy(in, "OverrideParent.java");
@@ -68,6 +73,8 @@ class RemappingTests {
         //this.copy(in, "eclipse/X.java");
         //this.copy(in, "eclipse/Test.java");
         // - Test 4
+        this.copy(in, "anon/Test.java");
+        // - Test 5
         this.copy(in, "com/example/ImportTest.java");
         this.copy(in, "com/example/other/AnotherClass.java");
         this.copy(in, "com/example/other/OtherClass.java");
@@ -89,6 +96,7 @@ class RemappingTests {
         // - Test 1
         this.verify(out, "Core.java");
         this.verify(out, "JavadocTest.java");
+        this.verify(out, "NameQualifiedTest.java");
         // - Test 2
         //this.verify(out, "OverrideChild.java");
         //this.verify(out, "OverrideParent.java");
@@ -96,6 +104,8 @@ class RemappingTests {
         //this.verify(out, "eclipse/X.java");
         //this.verify(out, "eclipse/Test.java");
         // - Test 4
+        this.verify(out, "anon/Anon.java");
+        // - Test 5
         this.verify(out, "net/example/ImportTestNew.java");
         this.verify(out, "net/example/newother/AnotherClass.java");
         this.verify(out, "net/example/newother/OtherClass.java");
