@@ -10,9 +10,8 @@
 
 package org.cadixdev.mercury.remapper;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.BiFunction;
+import static org.cadixdev.mercury.util.BombeBindings.convertSignature;
+
 import org.cadixdev.bombe.analysis.InheritanceProvider;
 import org.cadixdev.bombe.type.signature.FieldSignature;
 import org.cadixdev.bombe.type.signature.MethodSignature;
@@ -25,14 +24,20 @@ import org.cadixdev.lorenz.model.MethodMapping;
 import org.cadixdev.mercury.RewriteContext;
 import org.cadixdev.mercury.analysis.MercuryInheritanceProvider;
 import org.cadixdev.mercury.util.GracefulCheck;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
-import static org.cadixdev.mercury.util.BombeBindings.convertSignature;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 /**
  * Remaps only methods and fields.
@@ -84,6 +89,10 @@ class SimpleRemapperVisitor extends ASTVisitor {
 
     private void remapField(SimpleName node, IVariableBinding binding) {
         if (!binding.isField()) {
+            if (binding.isParameter()) {
+                remapParameter(node, binding);
+            }
+
             return;
         }
 
@@ -143,7 +152,7 @@ class SimpleRemapperVisitor extends ASTVisitor {
 
         // Find a sibling anonymous class whose obfuscated name is our deobfuscated name
         ClassMapping<?, ?> otherClassMapping = parentMapping
-            .getInnerClassMapping(classMapping.getDeobfuscatedName()).orElse(null);
+                .getInnerClassMapping(classMapping.getDeobfuscatedName()).orElse(null);
         if (otherClassMapping != null) {
             T mapping = getMapping.apply(otherClassMapping, matcher).orElse(null);
             if (mapping != null) {
@@ -163,6 +172,41 @@ class SimpleRemapperVisitor extends ASTVisitor {
             return null;
         }
         return getMapping.apply(otherClassMapping, matcher).orElse(null);
+    }
+
+    private void remapParameter(SimpleName node, IVariableBinding binding) {
+        IMethodBinding declaringMethod = binding.getDeclaringMethod();
+
+        if (declaringMethod == null) {
+           return;
+        }
+
+        int index = -1;
+
+        ASTNode n = context.getCompilationUnit().findDeclaringNode(declaringMethod);
+
+        if (n instanceof MethodDeclaration) {
+            MethodDeclaration methodDeclaration = (MethodDeclaration) n;
+
+            // noinspection unchecked
+            List<SingleVariableDeclaration> parameters = methodDeclaration.parameters();
+
+            for (int i = 0; i < parameters.size(); i++) {
+                if (binding.equals(parameters.get(i).resolveBinding())) {
+                    index = i;
+                }
+            }
+        }
+
+        if (index == -1) {
+            return;
+        }
+
+        int finalIndex = index;
+        this.mappings.getClassMapping(declaringMethod.getDeclaringClass().getBinaryName())
+                .flatMap(classMapping -> classMapping.getMethodMapping(convertSignature(declaringMethod)))
+                .flatMap(methodMapping -> methodMapping.getParameterMapping(finalIndex))
+                .ifPresent(parameterMapping -> updateIdentifier(node, parameterMapping.getDeobfuscatedName()));
     }
 
     protected void visit(SimpleName node, IBinding binding) {

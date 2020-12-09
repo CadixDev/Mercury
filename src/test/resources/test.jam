@@ -1,0 +1,38 @@
+# Test 1. Simple remaps
+CL test/ObfClass Core
+FD test/ObfClass name Ljava/lang/String; firstName
+MD test/ObfClass name ()Ljava/lang/String; firstName
+
+# Test 2. Parameter remapping
+MD ParameterTest advancedTest0 (II)Ljava/lang/String; advancedTest
+MP ParameterTest simpleNoopTest (I)V 0 i
+MP ParameterTest simpleTestWithGenerics (Ljava/lang/Object;)Ljava/lang/Object; 0 t
+MP ParameterTest simpleTestWithJavadoc (Ltest/ObfClass;)V 0 core
+MP ParameterTest simpleTest (I)V 0 i
+MP ParameterTest simpleTest (Ltest/ObfClass;)V 0 core
+MP ParameterTest advancedTest (Ljava/lang/String;)I 0 number
+MD ParameterTest advancedTest0 (II)Ljava/lang/String; advancedTest
+MP ParameterTest advancedTest0 (II)Ljava/lang/String; 0 number
+MP ParameterTest advancedTest0 (II)Ljava/lang/String; 1 radix
+
+# Test 3. Remap overrides
+CL OverrideParent OverrideParent
+MD OverrideParent abc ()Ljava/lang/Object; get
+MD OverrideParent bcd ()Ljava/lang/Object; fetch
+MD OverrideParent cde (Ljava/lang/Object;)V set
+
+# Test 4. Eclipse bug
+CL eclipse/X eclipse/X
+FD eclipse/X text Ljava/lang/String; message
+CL eclipse/Test eclipse/Test
+FD eclipse/Test text Ljava/lang/String; message
+
+# Test 5. Anonymous class remap
+CL anon/Test anon/Anon
+CL anon/Test$1 anon/Anon$3
+CL anon/Test$2 anon/Anon$1
+CL anon/Test$3 anon/Anon$2
+FD anon/Test$2 field I abc
+MD anon/Test$1 name (II)V remapped
+MD anon/Test$2 name (DD)V remapped
+MD anon/Test$3 name (ZZ)V remapped

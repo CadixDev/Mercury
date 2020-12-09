@@ -39,15 +39,20 @@ class RemappingTests {
     //      - Mercury will remove package declarations when remapping to the
     //        root package (GH-11)
     //      - Mercury will remap Javadoc references (GH-6)
-    // 2. Method overriding and generics
+    // 2. Parameter remaps
+    //    This test is used to verify that Mercury can remap parameter names:
+    //      - In source code
+    //      - In Javadoc references
+    //      - Within lambda expressions and anonymous classes
+    // 3. Method overriding and generics
     //    This test is used to verify that Mercury can handle child classes
     //    overriding methods from their parents:
     //      - Mercury will remap methods with their return type raised (GH-14) (currently disabled)
     //      - Mercury can handle generic return types, and parameters (GH-8) (currently disabled)
-    // 3. Eclipse Bugs
+    // 4. Eclipse Bugs
     //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=511958 (currently disabled)
     //      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=564263 (currently disabled)
-    // 4. Anonymous class remapping
+    // 5. Anonymous class remapping
     //    This test verifies we can handle remapping cases for different anonymous class remapping
     //    combinations (GH-31).
 
@@ -66,18 +71,20 @@ class RemappingTests {
         this.copy(in, "JavadocTest.java");
         this.copy(in, "NameQualifiedTest.java");
         // - Test 2
+        this.copy(in, "ParameterTest.java");
+        // - Test 3
         //this.copy(in, "OverrideChild.java");
         //this.copy(in, "OverrideParent.java");
-        // - Test 3
+        // - Test 4
         //this.copy(in, "eclipse/X.java");
         //this.copy(in, "eclipse/Test.java");
-        // - Test 4
+        // - Test 5
         this.copy(in, "anon/Test.java");
 
         // Load our test mappings
         final MappingSet mappings = MappingSet.create();
-        try (final MappingsReader reader = MappingFormats.TSRG
-                .createReader(RemappingTests.class.getResourceAsStream("/test.tsrg"))) {
+        try (final MappingsReader reader = MappingFormats.byId("jam")
+                .createReader(RemappingTests.class.getResourceAsStream("/test.jam"))) {
             reader.read(mappings);
         }
 
@@ -92,12 +99,14 @@ class RemappingTests {
         this.verify(out, "JavadocTest.java");
         this.verify(out, "NameQualifiedTest.java");
         // - Test 2
+        this.verify(out, "ParameterTest.java");
+        // - Test 3
         //this.verify(out, "OverrideChild.java");
         //this.verify(out, "OverrideParent.java");
-        // - Test 3
+        // - Test 4
         //this.verify(out, "eclipse/X.java");
         //this.verify(out, "eclipse/Test.java");
-        // - Test 4
+        // - Test 5
         this.verify(out, "anon/Anon.java");
 
         // Delete the directory
