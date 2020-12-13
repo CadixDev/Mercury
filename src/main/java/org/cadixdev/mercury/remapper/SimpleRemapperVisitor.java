@@ -77,14 +77,11 @@ class SimpleRemapperVisitor extends ASTVisitor {
             return;
         }
         final ClassMapping<?, ?> classMapping = this.mappings.getOrCreateClassMapping(declaringClass.getBinaryName());
-        classMapping.complete(this.inheritanceProvider, declaringClass);
 
         if (binding.isConstructor()) {
             updateIdentifier(node, classMapping.getSimpleDeobfuscatedName());
         } else {
-            MethodSignature bindingSignature = convertSignature(binding);
-            MethodMapping mapping = findMemberMapping(bindingSignature, classMapping, ClassMapping::getMethodMapping);
-
+            final MethodMapping mapping = findMethodMapping(declaringClass, binding);
             if (mapping == null) {
                 return;
             }
@@ -123,6 +120,22 @@ class SimpleRemapperVisitor extends ASTVisitor {
         updateIdentifier(node, mapping.getDeobfuscatedName());
     }
 
+    private MethodMapping findMethodMapping(ITypeBinding declaringClass, IMethodBinding declaringMethod) {
+        final ClassMapping<?, ?> classMapping = this.mappings.getClassMapping(declaringClass.getBinaryName()).orElse(null);
+        if (classMapping == null) {
+            return null;
+        }
+
+        final MethodSignature methodSig = convertSignature(declaringMethod);
+        MethodMapping methodMapping = findMemberMapping(methodSig, classMapping, ClassMapping::getMethodMapping);
+        if (methodMapping == null) {
+            classMapping.complete(this.inheritanceProvider, declaringClass);
+            methodMapping = classMapping.getMethodMapping(methodSig).orElse(null);
+        }
+
+        return methodMapping;
+    }
+
     private <T extends MemberMapping<?, ?>, M> T findMemberMapping(
         M matcher,
         ClassMapping<?, ?> classMapping,
@@ -133,6 +146,9 @@ class SimpleRemapperVisitor extends ASTVisitor {
             return mapping;
         }
 
+        if (!this.context.getMercury().isFlexibleAnonymousClassMemberLookups()) {
+            return null;
+        }
         return findMemberMappingAnonClass(matcher, classMapping, getMapping);
     }
 
@@ -209,20 +225,17 @@ class SimpleRemapperVisitor extends ASTVisitor {
             return;
         }
 
-        int finalIndex = index;
-
         final ITypeBinding declaringClass = declaringMethod.getDeclaringClass();
         if (declaringClass == null) {
             return;
         }
 
-        this.mappings.getClassMapping(declaringClass.getBinaryName())
-                .flatMap(classMapping -> {
-                    classMapping.complete(this.inheritanceProvider, declaringClass);
-                    return classMapping.getMethodMapping(convertSignature(declaringMethod));
-                })
-                .flatMap(methodMapping -> methodMapping.getParameterMapping(finalIndex))
-                .ifPresent(parameterMapping -> updateIdentifier(node, parameterMapping.getDeobfuscatedName()));
+        final MethodMapping methodMapping = findMethodMapping(declaringClass, declaringMethod);
+        if (methodMapping == null) {
+            return;
+        }
+
+        methodMapping.getParameterMapping(index).ifPresent(paramMapping -> updateIdentifier(node, paramMapping.getDeobfuscatedName()));
     }
 
     /**
