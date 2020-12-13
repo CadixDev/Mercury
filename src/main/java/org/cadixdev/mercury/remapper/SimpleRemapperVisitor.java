@@ -77,17 +77,13 @@ class SimpleRemapperVisitor extends ASTVisitor {
             return;
         }
         final ClassMapping<?, ?> classMapping = this.mappings.getOrCreateClassMapping(declaringClass.getBinaryName());
+        classMapping.complete(this.inheritanceProvider, declaringClass);
 
         if (binding.isConstructor()) {
             updateIdentifier(node, classMapping.getSimpleDeobfuscatedName());
         } else {
             MethodSignature bindingSignature = convertSignature(binding);
             MethodMapping mapping = findMemberMapping(bindingSignature, classMapping, ClassMapping::getMethodMapping);
-
-            if (mapping == null) {
-                classMapping.complete(this.inheritanceProvider, declaringClass);
-                mapping = classMapping.getMethodMapping(bindingSignature).orElse(null);
-            }
 
             if (mapping == null) {
                 return;
@@ -188,9 +184,8 @@ class SimpleRemapperVisitor extends ASTVisitor {
 
     private void remapParameter(SimpleName node, IVariableBinding binding) {
         IMethodBinding declaringMethod = binding.getDeclaringMethod();
-
         if (declaringMethod == null) {
-           return;
+            return;
         }
 
         int index = -1;
@@ -215,8 +210,17 @@ class SimpleRemapperVisitor extends ASTVisitor {
         }
 
         int finalIndex = index;
-        this.mappings.getClassMapping(declaringMethod.getDeclaringClass().getBinaryName())
-                .flatMap(classMapping -> classMapping.getMethodMapping(convertSignature(declaringMethod)))
+
+        final ITypeBinding declaringClass = declaringMethod.getDeclaringClass();
+        if (declaringClass == null) {
+            return;
+        }
+
+        this.mappings.getClassMapping(declaringClass.getBinaryName())
+                .flatMap(classMapping -> {
+                    classMapping.complete(this.inheritanceProvider, declaringClass);
+                    return classMapping.getMethodMapping(convertSignature(declaringMethod));
+                })
                 .flatMap(methodMapping -> methodMapping.getParameterMapping(finalIndex))
                 .ifPresent(parameterMapping -> updateIdentifier(node, parameterMapping.getDeobfuscatedName()));
     }
@@ -299,8 +303,12 @@ class SimpleRemapperVisitor extends ASTVisitor {
             IMethodBinding blockDeclaringMethod,
             Block body
     ) {
-        this.mappings.getClassMapping(binding.getDeclaringClass().getBinaryName())
-                .flatMap(classMapping -> classMapping.getMethodMapping(convertSignature(binding)))
+        final ITypeBinding declaringClass = binding.getDeclaringClass();
+        this.mappings.getClassMapping(declaringClass.getBinaryName())
+                .flatMap(classMapping -> {
+                    classMapping.complete(this.inheritanceProvider, declaringClass);
+                    return classMapping.getMethodMapping(convertSignature(binding));
+                })
                 .ifPresent(methodMapping -> {
                     if (!methodMapping.getParameterMappings().isEmpty()) {
                         final Set<String> newParamNames = newParamNames(declaration, methodMapping);
