@@ -344,7 +344,7 @@ class RemapperVisitor extends SimpleRemapperVisitor {
                 }
             }
 
-            ClassMapping<?, ?> mapping = this.mappings.getClassMapping(inner.getBinaryName()).orElse(null);
+            ClassMapping<?, ?> mapping = this.mappings.computeClassMapping(inner.getBinaryName()).orElse(null);
 
             if (isPackagePrivate(modifiers)) {
                 // Must come from the same package
