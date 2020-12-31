@@ -154,7 +154,14 @@ public final class AccessTransformerRewriter implements SourceRewriter {
         }
 
         private void visitDeclaration(AbstractTypeDeclaration declaration) {
-            AccessTransformSet.Class classSet = findClass(declaration.resolveBinding());
+            final ITypeBinding binding = declaration.resolveBinding();
+            if (binding == null) {
+                if (this.context.getMercury().isGracefulClasspathChecks()) {
+                    return;
+                }
+                throw new IllegalStateException("No binding for type declaration " + declaration.getName() + " in class " + this.context.getQualifiedPrimaryType());
+            }
+            AccessTransformSet.Class classSet = findClass(binding);
             if (classSet != null) {
                 transform(declaration, classSet.get());
             }
@@ -186,6 +193,12 @@ public final class AccessTransformerRewriter implements SourceRewriter {
             List<VariableDeclarationFragment> fragments = node.fragments();
             for (VariableDeclarationFragment fragment : fragments) {
                 IVariableBinding binding = fragment.resolveBinding();
+                if (binding == null) {
+                    if (this.context.getMercury().isGracefulClasspathChecks()) {
+                        continue;
+                    }
+                    throw new IllegalStateException("No binding for field node " + fragment.getName() + " in class " + this.context.getQualifiedPrimaryType());
+                }
 
                 AccessTransformSet.Class classSet = findClass(binding.getDeclaringClass());
                 if (classSet != null) {
@@ -200,6 +213,13 @@ public final class AccessTransformerRewriter implements SourceRewriter {
         @Override
         public boolean visit(MethodDeclaration node) {
             IMethodBinding binding = node.resolveBinding();
+            if (binding == null) {
+                if (this.context.getMercury().isGracefulClasspathChecks()) {
+                    return false;
+                }
+                throw new IllegalStateException("No binding for method node " + node.getName() + " in class " + this.context.getQualifiedPrimaryType());
+            }
+
             ITypeBinding declaringClass = binding.getDeclaringClass();
             if (declaringClass == null) {
                 return true;

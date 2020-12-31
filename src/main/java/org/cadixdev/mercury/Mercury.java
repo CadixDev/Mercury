@@ -52,6 +52,11 @@ public final class Mercury {
      * broken, but we want to ignore
      */
     private boolean gracefulJavadocClasspathChecks = false;
+    /**
+     * Mercury will try different combinations of anonymous class indexes when searching
+     * for member mappings if this is true.
+     */
+    private boolean flexibleAnonymousClassMemberLookups = false;
 
     private final List<Path> classPath = new ArrayList<>();
     private final List<Path> sourcePath = new ArrayList<>();
@@ -94,6 +99,14 @@ public final class Mercury {
 
     public void setGracefulJavadocClasspathChecks(final boolean enable) {
         this.gracefulJavadocClasspathChecks = enable;
+    }
+
+    public boolean isFlexibleAnonymousClassMemberLookups() {
+        return this.flexibleAnonymousClassMemberLookups;
+    }
+
+    public void setFlexibleAnonymousClassMemberLookups(final boolean enable) {
+        this.flexibleAnonymousClassMemberLookups = enable;
     }
 
     public List<Path> getClassPath() {

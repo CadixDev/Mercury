@@ -271,7 +271,6 @@ class RemapperVisitor extends SimpleRemapperVisitor {
         return false;
     }
 
-
     @Override
     public boolean visit(PackageDeclaration node) {
         String currentPackage = node.getName().getFullyQualifiedName();
@@ -344,12 +343,12 @@ class RemapperVisitor extends SimpleRemapperVisitor {
                 }
             }
 
-            ClassMapping<?, ?> mapping = this.mappings.getClassMapping(inner.getBinaryName()).orElse(null);
+            ClassMapping<?, ?> mapping = this.mappings.computeClassMapping(inner.getBinaryName()).orElse(null);
 
             if (isPackagePrivate(modifiers)) {
                 // Must come from the same package
                 String packageName = mapping != null ? mapping.getDeobfuscatedPackage() : inner.getPackage().getName();
-                if (packageName.equals(this.context.getPackageName())) {
+                if (!packageName.replace('/', '.').equals(this.context.getPackageName().replace('/', '.'))) {
                     continue;
                 }
             }
