@@ -72,7 +72,7 @@ public class SourceContext {
 
     public final Document loadDocument() throws IOException {
         if (this.document == null) {
-            this.document = new Document(new String(Files.readAllBytes(this.sourceFile), StandardCharsets.UTF_8));
+            this.document = new Document(new String(Files.readAllBytes(this.sourceFile), this.mercury.getEncoding()));
         }
         return this.document;
     }
