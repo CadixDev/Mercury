@@ -5,7 +5,7 @@ plugins {
     signing
     `maven-publish`
     id("uk.jamierocks.propatcher") version "1.3.1"
-    id("net.minecrell.licenser") version "0.4.1"
+    id("org.cadixdev.licenser") version "0.5.0"
 }
 
 val artifactId = name.toLowerCase()
@@ -25,7 +25,7 @@ repositories {
     mavenCentral()
 }
 
-val jdt = "org.eclipse.jdt:org.eclipse.jdt.core:3.21.0"
+val jdt = "org.eclipse.jdt:org.eclipse.jdt.core:3.24.0"
 dependencies {
     api(jdt)
 
