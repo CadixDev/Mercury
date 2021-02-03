@@ -25,11 +25,14 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IDocElement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
@@ -38,9 +41,11 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -188,6 +193,32 @@ class RemapperVisitor extends SimpleRemapperVisitor {
             default:
                 throw new IllegalStateException("Unhandled binding: " + binding.getClass().getSimpleName() + " (" + binding.getKind() + ')');
         }
+    }
+
+    @Override
+    public boolean visit(final TagElement tag) {
+        // We don't want to visit the names of some Javadoc tags, since they can't be remapped.
+        if (TagElement.TAG_LINK.equals(tag.getTagName())) {
+            // With a @link tag, the first fragment will be a name
+            if (tag.fragments().size() >= 1) {
+                final Object fragment = tag.fragments().get(0);
+
+                // A package might be a SimpleName (test), or a QualifiedName (test.test)
+                if (fragment instanceof Name) {
+                    final Name name = (Name) fragment;
+                    final IBinding binding = name.resolveBinding();
+
+                    if (binding != null) {
+                        // We can't remap packages, so don't visit package names
+                        if (binding.getKind() == IBinding.PACKAGE) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return super.visit(tag);
     }
 
     @Override

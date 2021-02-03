@@ -66,6 +66,7 @@ class RemappingTests {
 
         // Copy our test classes to the temporary directory
         // - Test 1
+        this.copy(in, "test/test/Javadocs.java");
         this.copy(in, "test/ObfClass.java");
         this.copy(in, "NonNull.java");
         this.copy(in, "JavadocTest.java");

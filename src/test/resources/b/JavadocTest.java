@@ -25,4 +25,16 @@ class JavadocTest {
         return this.core.firstName();
     }
 
+    /**
+     * {@link test}
+     */
+    void testNonsense1() {
+    }
+
+    /**
+     * {@link test.test}
+     */
+    void testNonsense2() {
+    }
+
 }
