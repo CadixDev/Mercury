@@ -4,7 +4,7 @@ plugins {
     `java-library`
     signing
     `maven-publish`
-    id("uk.jamierocks.propatcher") version "1.3.1"
+    id("uk.jamierocks.propatcher") version "1.3.2"
     id("org.cadixdev.licenser") version "0.5.0"
 }
 
@@ -31,13 +31,13 @@ dependencies {
 
     // TODO: Split in separate modules
     api("org.cadixdev:at:0.1.0-rc1")
-    api("org.cadixdev:lorenz:0.5.2")
+    api("org.cadixdev:lorenz:0.5.7")
 
     "jdt"("$jdt:sources")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-    testRuntimeOnly("org.cadixdev:lorenz-io-jam:0.5.2")
+    testRuntimeOnly("org.cadixdev:lorenz-io-jam:0.5.7")
 }
 
 tasks.withType<Javadoc> {
