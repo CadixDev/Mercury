@@ -25,7 +25,7 @@ repositories {
     mavenCentral()
 }
 
-val jdt = "org.eclipse.jdt:org.eclipse.jdt.core:3.24.0"
+val jdt = "org.eclipse.jdt:org.eclipse.jdt.core:3.25.0"
 dependencies {
     api(jdt)
 
