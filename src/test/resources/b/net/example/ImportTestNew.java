@@ -20,8 +20,8 @@ import java.lang.Exception;
 public class ImportTestNew {
 
     public void test() {
-        OtherClass otherClass = new OtherClass();
-        AnotherClass anotherClass = new AnotherClass();
+        var otherClass = new OtherClass();
+        var anotherClass = new AnotherClass();
     }
 
 }

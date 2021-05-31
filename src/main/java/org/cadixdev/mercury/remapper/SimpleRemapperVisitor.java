@@ -68,7 +68,7 @@ class SimpleRemapperVisitor extends ASTVisitor {
     }
 
     final void updateIdentifier(SimpleName node, String newName) {
-        if (!node.getIdentifier().equals(newName)) {
+        if (!node.getIdentifier().equals(newName) && !node.isVar()) {
             this.context.createASTRewrite().set(node, SimpleName.IDENTIFIER_PROPERTY, newName, null);
         }
     }

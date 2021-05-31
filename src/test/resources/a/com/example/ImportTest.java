@@ -19,8 +19,8 @@ import java.lang.Exception;
 public class ImportTest {
 
     public void test() {
-        OtherClass otherClass = new OtherClass();
-        AnotherClass anotherClass = new AnotherClass();
+        var otherClass = new OtherClass();
+        var anotherClass = new AnotherClass();
     }
 
 }

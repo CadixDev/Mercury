@@ -121,7 +121,7 @@ class RemapperVisitor extends SimpleRemapperVisitor {
         String qualifiedName = (mapping != null ? mapping.getFullDeobfuscatedName().replace('/', '.') : binding.getBinaryName()).replace('$', '.');
         String newName = this.importRewrite.addImport(qualifiedName, this.importStack.peek());
 
-        if (!node.getIdentifier().equals(newName)) {
+        if (!node.getIdentifier().equals(newName) && !node.isVar()) {
             if (newName.indexOf('.') == -1) {
                 this.context.createASTRewrite().set(node, SimpleName.IDENTIFIER_PROPERTY, newName, null);
             } else {

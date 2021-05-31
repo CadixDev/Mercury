@@ -12,7 +12,8 @@ class OverrideChild extends OverrideParent<String> {
 
     @Override
     public String get() {
-        return "Hello, World!";
+        var result = "Hello, World!";
+        return result;
     }
 
     @Override

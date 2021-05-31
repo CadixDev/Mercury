@@ -19,6 +19,7 @@ import org.cadixdev.lorenz.io.MappingFormats;
 import org.cadixdev.lorenz.io.MappingsReader;
 import org.cadixdev.mercury.Mercury;
 import org.cadixdev.mercury.remapper.MercuryRemapper;
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -97,6 +98,7 @@ class RemappingTests {
 
         // Run Mercury
         final Mercury mercury = new Mercury();
+        mercury.setSourceCompatibility(JavaCore.VERSION_11);
         mercury.getProcessors().add(MercuryRemapper.create(mappings));
         mercury.setFlexibleAnonymousClassMemberLookups(true);
         mercury.rewrite(in, out);
