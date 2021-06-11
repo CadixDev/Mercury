@@ -20,6 +20,7 @@ import org.cadixdev.lorenz.io.MappingsReader;
 import org.cadixdev.mercury.Mercury;
 import org.cadixdev.mercury.remapper.MercuryRemapper;
 import org.eclipse.jdt.core.JavaCore;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -32,6 +33,134 @@ import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 
 class RemappingTests {
+
+    @Test
+    @DisplayName("remaps class declaration")
+    void remapClassDeclaration() throws Exception {
+        new RemapperTest("remap-class")
+                .register("a", "Declaration")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps field type")
+    void remapFieldType() throws Exception {
+        new RemapperTest("remap-class")
+                .copy("a")
+                .register("b", "b")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps method type")
+    void remapMethodType() throws Exception {
+        new RemapperTest("remap-class")
+                .copy("a")
+                .register("c", "c")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps method declaration")
+    void remapMethodDeclaration() throws Exception {
+        new RemapperTest("remap-method")
+                .register("a", "a")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps method call")
+    void remapMethodCall() throws Exception {
+        new RemapperTest("remap-method")
+                .copy("a")
+                .register("b", "b")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps field declaration")
+    void remapFieldDeclaration() throws Exception {
+        new RemapperTest("remap-field")
+                .register("a", "a")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps field usage")
+    void remapFieldUsage() throws Exception {
+        new RemapperTest("remap-field")
+                .copy("a")
+                .register("b", "b")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps enum constant declaration")
+    void remapEnumConstantDeclaration() throws Exception {
+        new RemapperTest("remap-field")
+                .register("c", "c")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps enum constant usage")
+    void remapEnumConstantUsage() throws Exception {
+        new RemapperTest("remap-field")
+                .copy("c")
+                .register("d", "d")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps single method parameter")
+    void remapSingleParameter() throws Exception {
+        new RemapperTest("remap-param")
+                .register("a", "a")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps multiple method parameters")
+    void remapMultipleParameters() throws Exception {
+        new RemapperTest("remap-param")
+                .register("b", "b")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps class reference in javadocs")
+    void remapJavadocClassReference() throws Exception {
+        new RemapperTest("remap-javadocs")
+                .copy("a")
+                .register("b", "b")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps field reference in javadocs")
+    void remapJavadocFieldReference() throws Exception {
+        new RemapperTest("remap-javadocs")
+                .copy("a")
+                .register("c", "c")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps method reference in javadocs")
+    void remapJavadocMethodReference() throws Exception {
+        new RemapperTest("remap-javadocs")
+                .copy("a")
+                .register("d", "d")
+                .test();
+    }
+
+    @Test
+    @DisplayName("remaps parameter reference in javadocs")
+    void remapJavadocParamReference() throws Exception {
+        new RemapperTest("remap-javadocs")
+                .register("e", "e")
+                .test();
+    }
 
     // Mercury contains the following tests:
     // 1. Simple remaps

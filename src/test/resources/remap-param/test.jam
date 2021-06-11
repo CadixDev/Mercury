@@ -1,0 +1,6 @@
+# a.java
+MP a a (Ljava/lang/String;)V 0 name
+
+# b.java
+MP b a (Ljava/lang/String;Ljava/lang/String;)V 0 id
+MP b a (Ljava/lang/String;Ljava/lang/String;)V 1 name
